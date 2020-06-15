@@ -223,7 +223,7 @@ public class OrmTest {
         RegularEmployeeContractType.Permanent, deputyHead);
 
     task.getAcceptCriteriaById().add(acc);
-    EmployeeIssue empIssue = new EmployeeIssue("Workaround - need to rewatch");
+    EmployeeIssue empIssue = new EmployeeIssue("Workaround - need to rewatch",deputyHead,task);
     empIssue.setIssue(task);
     empIssue.setEmployee(specialist);
 

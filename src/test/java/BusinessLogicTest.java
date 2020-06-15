@@ -9,6 +9,7 @@ import java.util.Arrays;
 import javax.persistence.Query;
 import model.AcceptCriteria;
 import model.DeputyHead;
+import model.EmployeeIssue;
 import model.Project;
 import model.RegularEmployee.RegularEmployeeContractType;
 import model.Specialist;
@@ -141,7 +142,7 @@ public class BusinessLogicTest {
    * project/Set project into emp, get project from db, verify data prom projectDb
    */
   @Test
-  public void associationProjectEmployee() {
+  public void association_ProjectEmployee() {
     //Insert new project
     //new name every iteration because it's PK
     Long nr =
@@ -179,6 +180,49 @@ public class BusinessLogicTest {
     assertEquals(specialist.getProject(), projectDb);
     assertTrue(projectDb.getEmployees().contains(deputyHead));
     assertTrue(projectDb.getEmployees().contains(specialist));
+  }
+
+  @Test
+  public void associationManyToMany_EmployeeIssue() {
+    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+
+    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, deputyHead);
+
+    Task task = new Task("task title description test", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
+
+    EmployeeIssue deputyHeadIssue = new EmployeeIssue("Suggest rewatch this task", deputyHead, task);
+    EmployeeIssue deputySpecialistIssue = new EmployeeIssue("From my side done", specialist, task);
+
+    session.beginTransaction();
+    session.save(deputyHead);
+    session.save(specialist);
+    session.save(task);
+    session.save(deputyHeadIssue);
+    session.save(deputySpecialistIssue);
+    session.save(acc);
+    task.getAcceptCriteriaById().add(acc);
+    session.save(acc);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Task where id = :idTask")
+        .setParameter("idTask", task.getId());
+    Task taskDb = (Task) query.getSingleResult();
+
+    Query query2 = session.createQuery("from DeputyHead where id = :idDeputyHead")
+        .setParameter("idDeputyHead", deputyHead.getId());
+    DeputyHead deputyHeadDb = (DeputyHead) query2.getSingleResult();
+
+    assertTrue(taskDb.getEmployeeIssues().contains(deputyHeadIssue));
+    assertTrue(taskDb.getEmployeeIssues().contains(deputySpecialistIssue));
+
+    assertEquals(deputyHeadDb.getEmployeeIssues().get(0).getIssue(),task);
+    assertEquals(specialist.getEmployeeIssues().get(0).getIssue(),task);
   }
 
   @AfterAll

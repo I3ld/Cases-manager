@@ -2,10 +2,11 @@ package model;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
-import java.util.TreeMap;
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -13,7 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
@@ -26,7 +26,7 @@ public abstract class Issue {
   private String description;
   private Date createDate = Date.valueOf(LocalDate.now());
   private IssueStatusType status = IssueStatusType.New; //default = NEW
-  private Collection<EmployeeIssue> employeeIssues;
+  private List<EmployeeIssue> employeeIssues = new ArrayList<>();
   private Project project;
 
   public Issue() { //Required by Hibernate
@@ -95,12 +95,20 @@ public abstract class Issue {
   }
 
   @OneToMany(mappedBy = "issue")
-  public Collection<EmployeeIssue> getEmployeeIssues() {
+  public List<EmployeeIssue> getEmployeeIssues() {
     return employeeIssues;
   }
 
-  public void setEmployeeIssues(Collection<EmployeeIssue> employeeIssues) {
+  public void setEmployeeIssues(List<EmployeeIssue> employeeIssues) {
     this.employeeIssues = employeeIssues;
+  }
+
+  public void addEmployeeIssue(EmployeeIssue employeeIssue) {
+    if (!employeeIssues.contains(employeeIssue)) {
+      employeeIssues.add(employeeIssue);
+
+      employeeIssue.setIssue(this); //reverse connection
+    }
   }
 
   @ManyToOne

@@ -2,6 +2,7 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +29,7 @@ public abstract class Employee {
   private List<String> phoneNumbers;
 
   private Project project;
-  private Collection<EmployeeIssue> employeeIssues;
+  private List<EmployeeIssue> employeeIssues = new ArrayList<>();
 
   public Employee() { //Required by Hibernate
   }
@@ -137,11 +138,19 @@ public abstract class Employee {
   }
 
   @OneToMany(mappedBy = "issue")
-  public Collection<EmployeeIssue> getEmployeeIssues() {
+  public List<EmployeeIssue> getEmployeeIssues() {
     return employeeIssues;
   }
 
-  public void setEmployeeIssues(Collection<EmployeeIssue> employeeIssues) {
+  public void setEmployeeIssues(List<EmployeeIssue> employeeIssues) {
     this.employeeIssues = employeeIssues;
+  }
+
+  public void addEmployeeIssue(EmployeeIssue employeeIssue) {
+    if (!employeeIssues.contains(employeeIssue)) {
+      employeeIssues.add(employeeIssue);
+
+      employeeIssue.setEmployee(this); //reverse connection
+    }
   }
 }

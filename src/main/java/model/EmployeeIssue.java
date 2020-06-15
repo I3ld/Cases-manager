@@ -14,7 +14,7 @@ import org.hibernate.annotations.GenericGenerator;
 public class EmployeeIssue {
 
   private int id;
-  private Date closeDate = Date.valueOf(LocalDate.now());
+  private Date closeDate = Date.valueOf(LocalDate.now()); //default now
   private String comment;
   private Employee employee;
   private Issue issue;
@@ -22,10 +22,14 @@ public class EmployeeIssue {
   public EmployeeIssue() { //Required by Hibernate
   }
 
-  public EmployeeIssue(String comment) {
+  public EmployeeIssue(String comment, Employee employee, Issue issue) {
     this.comment = comment;
-  }
+    this.employee = employee;
+    this.issue = issue;
 
+    employee.addEmployeeIssue(this);
+    issue.addEmployeeIssue(this);
+  }
 
   @Id
   @GeneratedValue(generator = "increment")
@@ -81,7 +85,13 @@ public class EmployeeIssue {
   }
 
   public void setEmployee(Employee employee) {
-    this.employee = employee;
+    if (this.employee == null && employee != null) {
+      this.employee = employee;
+      employee.addEmployeeIssue(this); //reverse connection
+    } else if (employee != null && !this.employee.equals(employee)) {
+      this.employee = employee;
+      employee.addEmployeeIssue(this); //reverse connection
+    }
   }
 
   @ManyToOne
@@ -90,6 +100,12 @@ public class EmployeeIssue {
   }
 
   public void setIssue(Issue issue) {
-    this.issue = issue;
+    if (this.issue == null && issue != null) {
+      this.issue = issue;
+      issue.addEmployeeIssue(this); //reverse connection
+    } else if (issue != null && !this.issue.equals(issue)) {
+      this.issue = issue;
+      issue.addEmployeeIssue(this); //reverse connection
+    }
   }
 }
