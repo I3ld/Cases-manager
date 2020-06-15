@@ -1,12 +1,17 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Arrays;
 import javax.persistence.Query;
 import model.AcceptCriteria;
+import model.DeputyHead;
 import model.Project;
+import model.RegularEmployee.RegularEmployeeContractType;
+import model.Specialist;
 import model.Task;
 import org.hibernate.Session;
 import org.junit.jupiter.api.AfterAll;
@@ -27,7 +32,7 @@ public class BusinessLogicTest {
   }
 
   /**
-   * TEST - qualified association: Issue[0..1] - Project[*] Insert new project, Insert new
+   * TEST - qualified association Issue[0..1] - Project[*]: Insert new project, Insert new
    * Issue(Task+AccCriteria), update associations, Get project from db, verify data prom projectDb
    */
   @Test
@@ -82,7 +87,7 @@ public class BusinessLogicTest {
   }
 
   /**
-   * TEST - qualified association: Issue[0..1] - Project[*] Insert new project, Insert new
+   * TEST - qualified association Issue[0..1] - Project[*]: Insert new project, Insert new
    * Issue(Task+AccCriteria), update associations, Get project from db, get non-existent issue from
    * project
    */
@@ -129,6 +134,51 @@ public class BusinessLogicTest {
               .getName());
       e.printStackTrace();
     }
+  }
+
+  /**
+   * TEST - association Employee[1..*] - Project[1]: Insert Project, Insert employees, assign emp to
+   * project/Set project into emp, get project from db, verify data prom projectDb
+   */
+  @Test
+  public void associationProjectEmployee() {
+    //Insert new project
+    //new name every iteration because it's PK
+    Long nr =
+        (Long) session.createQuery("select count(*) from Project").uniqueResult() + 1;
+    String projectName = "Name project" + nr;
+
+    Project project = new Project(projectName, "Description project test",
+        java.sql.Date.valueOf(LocalDate.now()), new BigDecimal("12456789.50"),
+        java.sql.Date.valueOf(LocalDate.parse("2022-11-04")));
+
+    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+
+    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, deputyHead);
+
+    session.beginTransaction();
+    session.save(project);
+    session.save(deputyHead);
+    session.save(specialist);
+    project.addEmployee(deputyHead);
+    specialist.setProject(project);
+    session.save(project);
+    session.save(specialist);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Project where name = :projectName")
+        .setParameter("projectName", projectName);
+
+    Project projectDb = (Project) query.getSingleResult();
+
+    assertEquals(deputyHead.getProject(), projectDb);
+    assertEquals(specialist.getProject(), projectDb);
+    assertTrue(projectDb.getEmployees().contains(deputyHead));
+    assertTrue(projectDb.getEmployees().contains(specialist));
   }
 
   @AfterAll

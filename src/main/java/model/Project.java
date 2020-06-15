@@ -2,6 +2,7 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +22,7 @@ public class Project {
   private BigDecimal budget;
   private Date expectedEndDate;
   private Date endDate;
-  private Collection<Employee> employees;
+  private Collection<Employee> employees = new ArrayList<>();
   private Map<Integer, Issue> issuesQualified = new TreeMap<>();
 
   public Project() { //Required by Hibernate
@@ -112,6 +113,8 @@ public class Project {
     return Objects.hash(name, description, createDate, budget, expectedEndDate, endDate);
   }
 
+  //association Employee - Project
+  //Required by hibernate
   @OneToMany(mappedBy = "project")
   public Collection<Employee> getEmployees() {
     return employees;
@@ -119,6 +122,15 @@ public class Project {
 
   public void setEmployees(Collection<Employee> employees) {
     this.employees = employees;
+  }
+
+  //association Employee - Project
+  //methods
+  public void addEmployee(Employee emp) {
+    if(!employees.contains(emp)){
+      employees.add(emp);
+      emp.setProject(this); // Add the reverse connection
+    }
   }
 
   //qualified association Issue - Project
