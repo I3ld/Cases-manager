@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import javax.persistence.Query;
 import model.AcceptCriteria;
+import model.Boss;
+import model.Company;
+import model.Contract;
 import model.DeputyHead;
 import model.EmployeeIssue;
 import model.Project;
@@ -271,6 +274,56 @@ public class BusinessLogicTest {
     DeputyHead deputyHeadDb = (DeputyHead) query.getSingleResult();
 
     assertEquals(deputyHeadDb.getEmployeeIssues().size(),1);
+  }
+
+  /**
+   * TEST - association Company[1..*] - Contract - Boss[*..1]: Insert companies, Insert
+   * boss, Insert contracts assigned to one boss with difference company, verify
+   * data from DB
+   */
+  @Test
+  public void associationManyToMany_CompanyBoss() {
+    Company company = new Company("Ministerstwo Finansów - Cło i Transport",
+        "5260250274", "Sekretariat.CiT@mf.gov.pl");
+
+    Company company2 = new Company("Ministerstwo Finansów - Krajowa Administracja Skarbowa",
+        "5260250274", "Sekretariat.DC@mf.gov.pl");
+
+    Boss boss = new Boss("Peter", "Parker", BigDecimal.valueOf(22500.11),
+        Date.valueOf(LocalDate.parse("2019-12-03")), Arrays.asList("321-856-963", "563-753-852"),
+        BigDecimal.valueOf(1435234.22));
+
+    Contract contract = new Contract(Date.valueOf(LocalDate.now()),
+        "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI",
+        Date.valueOf(LocalDate.parse("2023-05-05")),company,boss);
+
+    Contract contract2 = new Contract(Date.valueOf(LocalDate.now()),
+        "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI2",
+        Date.valueOf(LocalDate.parse("2021-01-01")),company2,boss);
+
+    session.beginTransaction();
+    session.save(company);
+    session.save(company2);
+    session.save(boss);
+    session.save(contract);
+    session.save(contract2);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Boss where id = :bossId")
+        .setParameter("bossId", boss.getId());
+
+    Boss bossDb = (Boss) query.getSingleResult();
+
+    Query query2 = session.createQuery("from Company where id = :companyId")
+        .setParameter("companyId", company.getId());
+
+    Company companyDb = (Company) query2.getSingleResult();
+
+    assertTrue(bossDb.getContracts().contains(contract));
+    assertTrue(bossDb.getContracts().contains(contract2));
+    assertTrue(companyDb.getContracts().contains(contract));
+    assertTrue(companyDb.getContracts().get(0).getBoss().equals(boss));
+    assertTrue(companyDb.getContracts().get(0).getCompany().equals(company));
   }
 
   @AfterAll

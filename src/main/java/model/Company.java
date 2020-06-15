@@ -1,6 +1,8 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Entity;
@@ -16,7 +18,7 @@ public class Company {
   private String name;
   private String registrationNumber;
   private String contactEmail;
-  private Collection<Contract> contracts;
+  private List<Contract> contracts = new ArrayList<>();
 
   public Company() { //Required by Hibernate
   }
@@ -86,11 +88,19 @@ public class Company {
   }
 
   @OneToMany(mappedBy = "company")
-  public Collection<Contract> getContracts() {
+  public List<Contract> getContracts() {
     return contracts;
   }
 
-  public void setContracts(Collection<Contract> contracts) {
+  public void setContracts(List<Contract> contracts) {
     this.contracts = contracts;
+  }
+
+  public void addContract(Contract contract) {
+    if (!contracts.contains(contract)) {
+      contracts.add(contract);
+
+      contract.setCompany(this); //reverse connection
+    }
   }
 }

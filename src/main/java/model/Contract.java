@@ -22,10 +22,16 @@ public class Contract {
   public Contract() { //Required by Hibernate
   }
 
-  public Contract(Date startDate, String scope, Date deliveryProductDate) {
+  public Contract(Date startDate, String scope, Date deliveryProductDate, Company company,
+      Boss boss) {
     this.startDate = startDate;
     this.scope = scope;
     this.deliveryProductDate = deliveryProductDate;
+    this.company = company;
+    this.boss = boss;
+
+    company.addContract(this);
+    boss.addContract(this);
   }
 
   @Id
@@ -92,7 +98,13 @@ public class Contract {
   }
 
   public void setCompany(Company company) {
-    this.company = company;
+    if (this.company == null && company != null) {
+      this.company = company;
+      company.addContract(this); //reverse connection
+    } else if (company != null && !this.company.equals(company)) {
+      this.company = company;
+      company.addContract(this); //reverse connection
+    }
   }
 
   @ManyToOne
@@ -101,6 +113,12 @@ public class Contract {
   }
 
   public void setBoss(Boss boss) {
-    this.boss = boss;
+    if (this.boss == null && boss != null) {
+      this.boss = boss;
+      boss.addContract(this); //reverse connection
+    } else if (boss != null && !this.boss.equals(boss)) {
+      this.boss = boss;
+      boss.addContract(this); //reverse connection
+    }
   }
 }

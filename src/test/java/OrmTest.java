@@ -144,16 +144,13 @@ public class OrmTest {
     Company company = new Company("Ministerstwo Finansów - Krajowa Administracja Skarbowa",
         "5260250274", "Sekretariat.DC@mf.gov.pl");
 
-    Boss boss = new Boss("Peter", "PArker", BigDecimal.valueOf(22500.11),
+    Boss boss = new Boss("Peter", "Parker", BigDecimal.valueOf(22500.11),
         Date.valueOf(LocalDate.parse("2019-12-03")), Arrays.asList("321-856-963", "563-753-852"),
         BigDecimal.valueOf(1435234.22));
 
     Contract contract = new Contract(Date.valueOf(LocalDate.now()),
         "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI",
-        Date.valueOf(LocalDate.parse("2023-05-05")));
-
-    contract.setBoss(boss);
-    contract.setCompany(company);
+        Date.valueOf(LocalDate.parse("2023-05-05")),company,boss);
 
     session.beginTransaction();
     session.save(company);

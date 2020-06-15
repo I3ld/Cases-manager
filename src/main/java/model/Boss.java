@@ -2,6 +2,7 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import javax.persistence.OneToMany;
 public class Boss extends Employee {
 
   private BigDecimal budget;
-  private Collection<Contract> contracts;
+  private List<Contract> contracts = new ArrayList<>();
 
   public Boss() { //Required by Hibernate
   }
@@ -55,11 +56,19 @@ public class Boss extends Employee {
   }
 
   @OneToMany(mappedBy = "boss")
-  public Collection<Contract> getContracts() {
+  public List<Contract> getContracts() {
     return contracts;
   }
 
-  public void setContracts(Collection<Contract> contracts) {
+  public void setContracts(List<Contract> contracts) {
     this.contracts = contracts;
+  }
+
+  public void addContract(Contract contract) {
+    if (!contracts.contains(contract)) {
+      contracts.add(contract);
+
+      contract.setBoss(this); //reverse connection
+    }
   }
 }
