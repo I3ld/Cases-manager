@@ -171,7 +171,8 @@ public class OrmTest {
 
   @Test
   public void insertEvent() {
-    Event event = new Event("Progress of development despite time differences", "Progress review",
+    Event event = new Event("Progress of development despite time differences",
+        "Progress review",
         Date.valueOf(LocalDate.parse("2020-12-06")));
 
     session.beginTransaction();

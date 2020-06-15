@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
@@ -21,10 +22,10 @@ import org.hibernate.annotations.GenericGenerator;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Issue {
 
-  private int id;
+  private Integer id;
   private String description;
   private Date createDate = Date.valueOf(LocalDate.now());
-  private IssueStatusType status; // default NEW
+  private IssueStatusType status = IssueStatusType.New; //default = NEW
   private Collection<EmployeeIssue> employeeIssues;
   private Project project;
 
@@ -33,18 +34,16 @@ public abstract class Issue {
 
   public Issue(String description) {
     this.description = description;
-
-    status = IssueStatusType.New;
   }
 
   @Id
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "increment")
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

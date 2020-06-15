@@ -7,15 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-import javax.transaction.Transactional;
 
 @Entity
 public class Project {
@@ -126,14 +121,31 @@ public class Project {
     this.employees = employees;
   }
 
-  @Transient
-  public Issue getIssuesQualified(int id) {
+  //qualified association Issue - Project
+  //Required by hibernate
+  @OneToMany(mappedBy = "project")
+  @MapKey(name = "id")
+  public Map<Integer, Issue> getIssuesQualified() {
+    return issuesQualified;
+  }
+
+  public void setIssuesQualified(Map<Integer, Issue> issuesQualified) {
+    this.issuesQualified = issuesQualified;
+  }
+
+  //qualified association Issue - Project
+  //Methods - get/add issue to map extent
+  public Issue getIssuesQualifiedById(int id) throws Exception {
+    // Check if we have the info
+    if (!issuesQualified.containsKey(id)) {
+      throw new Exception("Unable to find a issue with id: " + id);
+    }
     return issuesQualified.get(id);
   }
 
-  public void setIssuesQualified(Issue issue) {
+  public void addIssueQualified(Issue issue) {
     // Check if we already have the info
-    if(!issuesQualified.containsKey(issue.getId())) {
+    if (!issuesQualified.containsKey(issue.getId())) {
       issuesQualified.put(issue.getId(), issue);
 
       // Add the reverse connection

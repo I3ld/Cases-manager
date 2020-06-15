@@ -17,7 +17,7 @@ public class Event extends Issue {
   public Event() { //Required by Hibernate
   }
 
-  public Event(String description, String title, Date endDate) {
+  public Event(String description,String title, Date endDate) {
     super(description);
     this.title = title;
     this.endDate = endDate;
