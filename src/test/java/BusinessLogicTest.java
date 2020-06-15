@@ -182,6 +182,11 @@ public class BusinessLogicTest {
     assertTrue(projectDb.getEmployees().contains(specialist));
   }
 
+  /**
+   * TEST - association Issue[1..*] - EmployeeIssue - Employee[*..1]: Insert deputyHead, Insert
+   * specialist, Insert task, Insert 2 empIssues to the same task with differences employees, verify
+   * data from DB
+   */
   @Test
   public void associationManyToMany_EmployeeIssue() {
     DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
@@ -196,7 +201,8 @@ public class BusinessLogicTest {
         Date.valueOf(LocalDate.parse("2021-12-06")));
     AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
 
-    EmployeeIssue deputyHeadIssue = new EmployeeIssue("Suggest rewatch this task", deputyHead, task);
+    EmployeeIssue deputyHeadIssue = new EmployeeIssue("Suggest rewatch this task", deputyHead,
+        task);
     EmployeeIssue deputySpecialistIssue = new EmployeeIssue("From my side done", specialist, task);
 
     session.beginTransaction();
@@ -207,7 +213,7 @@ public class BusinessLogicTest {
     session.save(deputySpecialistIssue);
     session.save(acc);
     task.getAcceptCriteriaById().add(acc);
-    session.save(acc);
+    session.save(task);
     session.getTransaction().commit();
 
     Query query = session.createQuery("from Task where id = :idTask")
@@ -221,8 +227,50 @@ public class BusinessLogicTest {
     assertTrue(taskDb.getEmployeeIssues().contains(deputyHeadIssue));
     assertTrue(taskDb.getEmployeeIssues().contains(deputySpecialistIssue));
 
-    assertEquals(deputyHeadDb.getEmployeeIssues().get(0).getIssue(),task);
-    assertEquals(specialist.getEmployeeIssues().get(0).getIssue(),task);
+    assertEquals(deputyHeadDb.getEmployeeIssues().get(0).getIssue(), task);
+    assertEquals(specialist.getEmployeeIssues().get(0).getIssue(), task);
+  }
+
+  /**
+   * TEST - association Issue[1..*] - EmployeeIssue - Employee[*..1]: Insert deputyHead, Insert
+   * specialist, Insert task, Insert the same empIssues more the one time, verify
+   * data from DB
+   */
+  @Test
+  public void associationManyToMany_EmployeeIssue_VerifyValidation() {
+    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+
+    Task task = new Task("task title description test", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
+
+    EmployeeIssue deputyHeadIssue = new EmployeeIssue("Suggest rewatch this task", deputyHead,
+        task);
+
+    session.beginTransaction();
+    session.save(deputyHead);
+    session.save(task);
+    session.save(deputyHeadIssue);
+    session.save(acc);
+    task.getAcceptCriteriaById().add(acc);
+    session.save(task);
+    deputyHead.addEmployeeIssue(deputyHeadIssue);
+    session.save(deputyHead);
+    deputyHead.addEmployeeIssue(deputyHeadIssue);
+    session.save(deputyHead);
+    deputyHead.addEmployeeIssue(deputyHeadIssue);
+    session.save(deputyHead);
+    deputyHead.addEmployeeIssue(deputyHeadIssue);
+    session.save(deputyHead);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from DeputyHead where id = :idDeputyHead")
+        .setParameter("idDeputyHead", deputyHead.getId());
+    DeputyHead deputyHeadDb = (DeputyHead) query.getSingleResult();
+
+    assertEquals(deputyHeadDb.getEmployeeIssues().size(),1);
   }
 
   @AfterAll
