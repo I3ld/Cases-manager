@@ -81,13 +81,27 @@ public class RegularEmployee extends Employee {
     this.subordinates = subordinates;
   }
 
+  public void addSubordinate(RegularEmployee subordinate) {
+    if (!subordinates.contains(subordinate)) {
+      subordinates.add(subordinate);
+      subordinate.setSupervisor(this); //reverse connection
+    }
+  }
+
   @ManyToOne
   public RegularEmployee getSupervisor() {
     return supervisor;
   }
 
   public void setSupervisor(RegularEmployee supervisor) {
-    this.supervisor = supervisor;
+    if(this.supervisor == null && supervisor != null){
+      this.supervisor = supervisor;
+      supervisor.addSubordinate(this); //reverse connection
+    }else if(this.supervisor != null && !this.supervisor.equals(supervisor)){
+      this.supervisor.getSubordinates().remove(this); //remove previous connection
+      this.supervisor = supervisor;
+      supervisor.addSubordinate(this); //reverse connection
+    }
   }
 
   @Override

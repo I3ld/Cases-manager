@@ -1,4 +1,5 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -248,8 +249,7 @@ public class BusinessLogicTest {
 
   /**
    * TEST - association Issue[1..*] - EmployeeIssue - Employee[*..1]: Insert deputyHead, Insert
-   * specialist, Insert task, Insert the same empIssues more the one time, verify
-   * data from DB
+   * specialist, Insert task, Insert the same empIssues more the one time, verify data from DB
    */
   @Test
   public void associationManyToMany_EmployeeIssue_VerifyValidation() {
@@ -288,13 +288,12 @@ public class BusinessLogicTest {
         .setParameter("idDeputyHead", deputyHead.getId());
     RegularEmployee deputyHeadDb = (RegularEmployee) query.getSingleResult();
 
-    assertEquals(deputyHeadDb.getEmployeeIssues().size(),1);
+    assertEquals(deputyHeadDb.getEmployeeIssues().size(), 1);
   }
 
   /**
-   * TEST - association Company[1..*] - Contract - Boss[*..1]: Insert companies, Insert
-   * boss, Insert contracts assigned to one boss with difference company, verify
-   * data from DB
+   * TEST - association Company[1..*] - Contract - Boss[*..1]: Insert companies, Insert boss, Insert
+   * contracts assigned to one boss with difference company, verify data from DB
    */
   @Test
   public void associationManyToMany_CompanyBoss() {
@@ -310,11 +309,11 @@ public class BusinessLogicTest {
 
     Contract contract = new Contract(Date.valueOf(LocalDate.now()),
         "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI",
-        Date.valueOf(LocalDate.parse("2023-05-05")),company,boss);
+        Date.valueOf(LocalDate.parse("2023-05-05")), company, boss);
 
     Contract contract2 = new Contract(Date.valueOf(LocalDate.now()),
         "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI2",
-        Date.valueOf(LocalDate.parse("2021-01-01")),company2,boss);
+        Date.valueOf(LocalDate.parse("2021-01-01")), company2, boss);
 
     session.beginTransaction();
     session.save(company);
@@ -341,7 +340,133 @@ public class BusinessLogicTest {
     assertTrue(companyDb.getContracts().get(0).getCompany().equals(company));
   }
 
+  /**
+   * TEST - association recursive RegularEmployee[1] - RegularEmployee[1..*]: Insert deputy head,
+   * Insert specialist, set supervisor for specialist, verify data.
+   *
+   * Insert new deputy head, set new deputy head for same specialist, verify data.
+   */
+  @Test
+  public void associationRecursive_SupervisorSubordinates_1() {
+    List<RegularEmployeeType> type = new ArrayList<>();
+    type.add(RegularEmployeeType.DeputyHead);
+    type.add(RegularEmployeeType.Specialist);
 
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    type.remove(0);
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, type);
+
+    session.beginTransaction();
+    session.save(deputyHead);
+    session.save(specialist);
+    specialist.setSupervisor(deputyHead);
+    session.save(specialist);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from RegularEmployee where id = :specialistId")
+        .setParameter("specialistId", specialist.getId());
+    RegularEmployee specialistDb = (RegularEmployee) query.getSingleResult();
+
+    Query query2 = session.createQuery("from RegularEmployee where id = :deputyHeadId")
+        .setParameter("deputyHeadId", deputyHead.getId());
+    RegularEmployee deputyHeadDb = (RegularEmployee) query2.getSingleResult();
+
+    assertEquals(specialistDb.getSupervisor(), deputyHead);
+    assertTrue(deputyHeadDb.getSubordinates().contains(specialist));
+
+    //Set new supervisor for specialist
+
+    RegularEmployee deputyHead2 = new RegularEmployee("Alan2", "Walker2",
+        BigDecimal.valueOf(2222.23),
+        Date.valueOf(LocalDate.parse("2002-12-03")), Arrays.asList("652-352-152", "658-852-242"),
+        RegularEmployeeContractType.Mandate, type);
+
+    session.beginTransaction();
+    session.save(deputyHead2);
+    specialist.setSupervisor(deputyHead2);
+    session.save(specialist);
+    session.getTransaction().commit();
+
+    Query query3 = session.createQuery("from RegularEmployee where id = :deputyHeadId")
+        .setParameter("deputyHeadId", deputyHead2.getId());
+    RegularEmployee deputyHeadDb2 = (RegularEmployee) query3.getSingleResult();
+
+    assertEquals(specialistDb.getSupervisor(), deputyHead2);
+    assertTrue(deputyHeadDb2.getSubordinates().contains(specialist));
+    assertFalse(deputyHeadDb.getSubordinates().contains(specialist));
+    assertEquals(0, deputyHeadDb.getSubordinates().size());
+    assertEquals(1, deputyHeadDb2.getSubordinates().size());
+    assertEquals(0, specialist.getSubordinates().size());
+  }
+
+  /**
+   * TEST - association recursive RegularEmployee[1] - RegularEmployee[1..*]: Insert deputy head,
+   * Insert specialist, add Subordinate for deputy head , verify data.
+   *
+   * Insert new deputy head, set new deputy head for specialist assigned to deputy head nr1 before, verify data.
+   */
+  @Test
+  public void associationRecursive_SupervisorSubordinates_2() {
+    List<RegularEmployeeType> type = new ArrayList<>();
+    type.add(RegularEmployeeType.DeputyHead);
+    type.add(RegularEmployeeType.Specialist);
+
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    type.remove(0);
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, type);
+
+    session.beginTransaction();
+    session.save(deputyHead);
+    session.save(specialist);
+    deputyHead.addSubordinate(specialist);
+    session.save(deputyHead);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from RegularEmployee where id = :specialistId")
+        .setParameter("specialistId", specialist.getId());
+    RegularEmployee specialistDb = (RegularEmployee) query.getSingleResult();
+
+    Query query2 = session.createQuery("from RegularEmployee where id = :deputyHeadId")
+        .setParameter("deputyHeadId", deputyHead.getId());
+    RegularEmployee deputyHeadDb = (RegularEmployee) query2.getSingleResult();
+
+    assertEquals(specialistDb.getSupervisor(), deputyHead);
+    assertTrue(deputyHeadDb.getSubordinates().contains(specialist));
+
+    //Set new supervisor for specialist
+
+    RegularEmployee deputyHead2 = new RegularEmployee("Alan2", "Walker2",
+        BigDecimal.valueOf(2222.23),
+        Date.valueOf(LocalDate.parse("2002-12-03")), Arrays.asList("652-352-152", "658-852-242"),
+        RegularEmployeeContractType.Mandate, type);
+
+    session.beginTransaction();
+    session.save(deputyHead2);
+    specialist.setSupervisor(deputyHead2);
+    session.save(specialist);
+    session.getTransaction().commit();
+
+    Query query3 = session.createQuery("from RegularEmployee where id = :deputyHeadId")
+        .setParameter("deputyHeadId", deputyHead2.getId());
+    RegularEmployee deputyHeadDb2 = (RegularEmployee) query3.getSingleResult();
+
+    assertEquals(specialistDb.getSupervisor(), deputyHead2);
+    assertTrue(deputyHeadDb2.getSubordinates().contains(specialist));
+    assertFalse(deputyHeadDb.getSubordinates().contains(specialist));
+    assertEquals(0, deputyHeadDb.getSubordinates().size());
+    assertEquals(1, deputyHeadDb2.getSubordinates().size());
+    assertEquals(0, specialist.getSubordinates().size());
+  }
 
   @AfterAll
   public void afterClassFunction() {
