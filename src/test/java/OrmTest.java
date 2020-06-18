@@ -4,19 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.persistence.Query;
 import model.AcceptCriteria;
 import model.Boss;
 import model.Company;
 import model.Contract;
-import model.DeputyHead;
 import model.EmployeeIssue;
 import model.Event;
 import model.Project;
+import model.RegularEmployee;
 import model.RegularEmployee.RegularEmployeeContractType;
 import model.RegularEmployee.RegularEmployeeType;
-import model.Specialist;
 import model.Task;
 import org.hibernate.Session;
 import org.junit.jupiter.api.AfterAll;
@@ -61,47 +62,44 @@ public class OrmTest {
   }
 
   @Test
-  public void insertDeputyHead() {
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
+  public void insertRegularEmployee_DeputyHead() {
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.DeputyHead);
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
         Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+        RegularEmployeeContractType.Mandate, type);
 
     session.beginTransaction();
     session.save(deputyHead);
     session.getTransaction().commit();
 
-    Query query = session.createQuery("from DeputyHead where id = :deputyHeadID")
+    Query query = session.createQuery("from RegularEmployee where id = :deputyHeadID")
         .setParameter("deputyHeadID", deputyHead.getId());
 
-    DeputyHead lastDeputyHead = (DeputyHead) query.getSingleResult();
+    RegularEmployee lastRegularEmployee = (RegularEmployee) query.getSingleResult();
 
-    assertEquals(deputyHead, lastDeputyHead);
-    assertTrue(lastDeputyHead.getRegularEmployeeType().contains(RegularEmployeeType.DeputyHead));
+    assertEquals(deputyHead, lastRegularEmployee);
   }
 
   @Test
-  public void insertSpecialist() {
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
-        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+  public void insertRegularEmployee_Specialist() {
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.Specialist);
 
-    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
         Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
-        RegularEmployeeContractType.Permanent, deputyHead);
+        RegularEmployeeContractType.Permanent, type);
 
     session.beginTransaction();
-    session.save(deputyHead);
     session.save(specialist);
     session.getTransaction().commit();
 
-    Query query = session.createQuery("from Specialist where id = :specialistID")
+    Query query = session.createQuery("from RegularEmployee where id = :specialistID")
         .setParameter("specialistID", specialist.getId());
 
-    Specialist lastSpecialist = (Specialist) query.getSingleResult();
+    RegularEmployee lastRegularEmployee = (RegularEmployee) query.getSingleResult();
 
-    assertEquals(specialist, lastSpecialist);
-    assertTrue(lastSpecialist.getRegularEmployeeType().contains(RegularEmployeeType.Specialist));
-    assertEquals(specialist.getSupervisor(), deputyHead);
+    assertEquals(specialist, lastRegularEmployee);
   }
 
   @Test
@@ -150,7 +148,7 @@ public class OrmTest {
 
     Contract contract = new Contract(Date.valueOf(LocalDate.now()),
         "SYSTEM MONITOROWANIA DROGOWEGO I KOLEJOWEGO PRZEWOZU TOWARÓW ORAZ OBROTU PALIWAMI OPAŁOWYMI",
-        Date.valueOf(LocalDate.parse("2023-05-05")),company,boss);
+        Date.valueOf(LocalDate.parse("2023-05-05")), company, boss);
 
     session.beginTransaction();
     session.save(company);
@@ -211,16 +209,19 @@ public class OrmTest {
         Date.valueOf(LocalDate.parse("2021-12-06")));
     AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
 
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
-        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.DeputyHead);
 
-    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.B2B,type);
+
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
         Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
-        RegularEmployeeContractType.Permanent, deputyHead);
+        RegularEmployeeContractType.Permanent, type);
 
     task.getAcceptCriteriaById().add(acc);
-    EmployeeIssue empIssue = new EmployeeIssue("Workaround - need to rewatch",deputyHead,task);
+    EmployeeIssue empIssue = new EmployeeIssue("Workaround - need to rewatch", deputyHead, task);
     empIssue.setIssue(task);
     empIssue.setEmployee(specialist);
 

@@ -5,17 +5,19 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.persistence.Query;
 import model.AcceptCriteria;
 import model.Boss;
 import model.Company;
 import model.Contract;
-import model.DeputyHead;
 import model.EmployeeIssue;
 import model.Project;
+import model.RegularEmployee;
 import model.RegularEmployee.RegularEmployeeContractType;
-import model.Specialist;
+import model.RegularEmployee.RegularEmployeeType;
 import model.Task;
 import org.hibernate.Session;
 import org.junit.jupiter.api.AfterAll;
@@ -156,13 +158,18 @@ public class BusinessLogicTest {
         java.sql.Date.valueOf(LocalDate.now()), new BigDecimal("12456789.50"),
         java.sql.Date.valueOf(LocalDate.parse("2022-11-04")));
 
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
-        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.DeputyHead);
+    type.add(RegularEmployeeType.Specialist);
 
-    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    type.remove(0);
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
         Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
-        RegularEmployeeContractType.Permanent, deputyHead);
+        RegularEmployeeContractType.Permanent, type);
 
     session.beginTransaction();
     session.save(project);
@@ -192,13 +199,18 @@ public class BusinessLogicTest {
    */
   @Test
   public void associationManyToMany_EmployeeIssue() {
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
-        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.DeputyHead);
+    type.add(RegularEmployeeType.Specialist);
 
-    Specialist specialist = new Specialist("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    type.remove(0);
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
         Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
-        RegularEmployeeContractType.Permanent, deputyHead);
+        RegularEmployeeContractType.Permanent, type);
 
     Task task = new Task("task title description test", "task title test", 2,
         Date.valueOf(LocalDate.parse("2021-12-06")));
@@ -223,9 +235,9 @@ public class BusinessLogicTest {
         .setParameter("idTask", task.getId());
     Task taskDb = (Task) query.getSingleResult();
 
-    Query query2 = session.createQuery("from DeputyHead where id = :idDeputyHead")
+    Query query2 = session.createQuery("from RegularEmployee where id = :idDeputyHead")
         .setParameter("idDeputyHead", deputyHead.getId());
-    DeputyHead deputyHeadDb = (DeputyHead) query2.getSingleResult();
+    RegularEmployee deputyHeadDb = (RegularEmployee) query2.getSingleResult();
 
     assertTrue(taskDb.getEmployeeIssues().contains(deputyHeadIssue));
     assertTrue(taskDb.getEmployeeIssues().contains(deputySpecialistIssue));
@@ -241,9 +253,12 @@ public class BusinessLogicTest {
    */
   @Test
   public void associationManyToMany_EmployeeIssue_VerifyValidation() {
-    DeputyHead deputyHead = new DeputyHead("Alan", "Walker", BigDecimal.valueOf(2445.23),
+    List<RegularEmployeeType> type = new ArrayList<RegularEmployeeType>();
+    type.add(RegularEmployeeType.DeputyHead);
+
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
         Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
-        RegularEmployeeContractType.Mandate, Date.valueOf(LocalDate.now()));
+        RegularEmployeeContractType.Mandate, type);
 
     Task task = new Task("task title description test", "task title test", 2,
         Date.valueOf(LocalDate.parse("2021-12-06")));
@@ -269,9 +284,9 @@ public class BusinessLogicTest {
     session.save(deputyHead);
     session.getTransaction().commit();
 
-    Query query = session.createQuery("from DeputyHead where id = :idDeputyHead")
+    Query query = session.createQuery("from RegularEmployee where id = :idDeputyHead")
         .setParameter("idDeputyHead", deputyHead.getId());
-    DeputyHead deputyHeadDb = (DeputyHead) query.getSingleResult();
+    RegularEmployee deputyHeadDb = (RegularEmployee) query.getSingleResult();
 
     assertEquals(deputyHeadDb.getEmployeeIssues().size(),1);
   }
@@ -325,6 +340,8 @@ public class BusinessLogicTest {
     assertTrue(companyDb.getContracts().get(0).getBoss().equals(boss));
     assertTrue(companyDb.getContracts().get(0).getCompany().equals(company));
   }
+
+
 
   @AfterAll
   public void afterClassFunction() {

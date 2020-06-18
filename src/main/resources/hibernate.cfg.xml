@@ -36,8 +36,5 @@
     <mapping class="model.Project"/>
     <mapping class="model.RegularEmployee"/>
     <mapping class="model.Task"/>
-    <mapping class="model.DeputyHead"/>
-    <mapping class="model.Specialist"/>
-
   </session-factory>
 </hibernate-configuration>
