@@ -15,7 +15,10 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
+import util.HibernateUtil;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -152,5 +155,12 @@ public abstract class Employee {
 
       employeeIssue.setEmployee(this); //reverse connection
     }
+  }
+
+  @Transient
+  public static List<Employee> getEmploeesByProject(Project project){
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    return session.createQuery("from Employee where project = :project")
+        .setParameter("project", project).list();
   }
 }

@@ -15,6 +15,7 @@ import model.AcceptCriteria;
 import model.Boss;
 import model.Company;
 import model.Contract;
+import model.Employee;
 import model.EmployeeIssue;
 import model.Event;
 import model.Issue;
@@ -659,6 +660,40 @@ public class BusinessLogicTest {
 
   }
 
+  /**
+   * Get all kind of emps that works in specific project
+   */
+  @Test
+  public void method_getEmpsByProject(){
+    //Insert new project
+    //new name every iteration because it's PK
+    Long nr =
+        (Long) session.createQuery("select count(*) from Project").uniqueResult() + 1;
+    String projectName = "Name project" + nr;
+
+    Project project = new Project(projectName, "Description project test",
+        java.sql.Date.valueOf(LocalDate.now()), new BigDecimal("12456789.50"),
+        java.sql.Date.valueOf(LocalDate.parse("2022-11-04")));
+
+    List<RegularEmployeeType> type = new ArrayList<>();
+    type.add(RegularEmployeeType.DeputyHead);
+
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    project.addEmployee(deputyHead);
+
+    session.beginTransaction();
+    session.save(deputyHead);
+    session.save(project);
+    session.getTransaction().commit();
+
+    List<Employee> empsFromProject = Employee.getEmploeesByProject(project);
+
+    // emp is same but because of Inheritance(emp/RegularEmp) equals doesnt work
+    assertEquals(empsFromProject.get(0).getId(), deputyHead.getId());
+  }
 
   @AfterAll
   public void afterClassFunction() {
