@@ -578,6 +578,12 @@ public class BusinessLogicTest {
   }
 
 
+  @Test
+  public void method_isAnyProject() {
+    boolean flag = Project.isAny();
+    assertTrue(flag);
+  }
+
   @AfterAll
   public void afterClassFunction() {
     session.close();

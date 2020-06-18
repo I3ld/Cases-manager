@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import org.hibernate.Session;
+import util.HibernateUtil;
 
 @Entity
 public class Project {
@@ -35,6 +37,19 @@ public class Project {
     this.createDate = createDate;
     this.budget = budget;
     this.expectedEndDate = expectedEndDate;
+  }
+
+  //to verify first rule in add new task process
+  public static boolean isAny() {
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    Long result = (Long) session.createQuery("select count(*) from Project").uniqueResult();
+    session.close();
+
+    if (result > 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Id
@@ -127,7 +142,7 @@ public class Project {
   //association Employee - Project
   //methods
   public void addEmployee(Employee emp) {
-    if(!employees.contains(emp)){
+    if (!employees.contains(emp)) {
       employees.add(emp);
       emp.setProject(this); // Add the reverse connection
     }
