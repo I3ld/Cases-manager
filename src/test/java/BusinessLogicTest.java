@@ -580,6 +580,19 @@ public class BusinessLogicTest {
 
   @Test
   public void method_isAnyProject() {
+    //Insert new project
+    //new name every iteration because it's PK
+    Long nr =
+        (Long) session.createQuery("select count(*) from Project").uniqueResult() + 1;
+    String projectName = "Name project" + nr;
+    Project project = new Project(projectName, "Description project test",
+        java.sql.Date.valueOf(LocalDate.now()), new BigDecimal("12456789.50"),
+        java.sql.Date.valueOf(LocalDate.parse("2022-11-04")));
+
+    session.beginTransaction();
+    session.save(project);
+    session.getTransaction().commit();
+
     boolean flag = Project.isAny();
     assertTrue(flag);
   }
