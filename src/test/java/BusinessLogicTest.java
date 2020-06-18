@@ -10,13 +10,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import model.AcceptCriteria;
 import model.Boss;
 import model.Company;
 import model.Contract;
 import model.EmployeeIssue;
+import model.Event;
 import model.Project;
 import model.RegularEmployee;
 import model.RegularEmployee.RegularEmployeeContractType;
@@ -472,8 +472,8 @@ public class BusinessLogicTest {
   }
 
   /**
-   * TEST - association composition Task - AcceptCritera: Insert task, insert acc criteria, add criteria to task, delete task,
-   * check acc criteria assigned to task also are deleted.
+   * TEST - association composition Task - AcceptCritera: Insert task, insert acc criteria, add
+   * criteria to task, delete task, check acc criteria assigned to task also are deleted.
    */
   @Test
   public void composition_TaskAccCriteria_DeleteParentOrphans() {
@@ -498,9 +498,10 @@ public class BusinessLogicTest {
         .setParameter("taskId", task.getId());
     Task lastTask = (Task) query.getSingleResult();
 
-    List<Integer> ids = Arrays.asList(acc.getId(),acc2.getId(),acc3.getId());
-    List<AcceptCriteria> taskAccCriteria = session.createQuery("from AcceptCriteria where id in (:AcceptCriteriaId)")
-        .setParameter("AcceptCriteriaId",ids ).list();
+    List<Integer> ids = Arrays.asList(acc.getId(), acc2.getId(), acc3.getId());
+    List<AcceptCriteria> taskAccCriteria = session
+        .createQuery("from AcceptCriteria where id in (:AcceptCriteriaId)")
+        .setParameter("AcceptCriteriaId", ids).list();
 
     assertEquals(task, lastTask);
     assertEquals(taskAccCriteria, lastTask.getAcceptCriteriaById());
@@ -514,11 +515,68 @@ public class BusinessLogicTest {
 
     taskAccCriteria = session.createQuery("from AcceptCriteria where id = :AcceptCriteriaId")
         .setParameter("AcceptCriteriaId", acc.getId()).list();
-    assertEquals(0,taskAccCriteria.size());
+    assertEquals(0, taskAccCriteria.size());
 
     Task taskAfterDelete = (Task) session.get(Task.class, removedTaskId);
     assertNull(taskAfterDelete);
   }
+
+  /**
+   * TEST - association aggregation  Event - Task: Insert event, insert tasks, add tasks to event,
+   * delete event, check tasks assigned to event also are deleted. Diff with prev test is in gui
+   * task will be able insert only with acc. Event cane be insert without task.
+   */
+  @Test
+  public void aggregation_EventTask_DeleteParentOrphans() {
+    Event event = new Event("Progress of development despite time differences",
+        "Progress review",
+        Date.valueOf(LocalDate.parse("2020-12-06")));
+
+    Task task = new Task("task title description test222", "task title test222", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    Task task2 = new Task("task title description test555", "task title test555", 1,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    Task task3 = new Task("task title description test333", "task title test333", 0,
+        Date.valueOf(LocalDate.parse("2019-01-16")));
+
+    event.getTasksById().add(task);
+    event.getTasksById().add(task2);
+    event.getTasksById().add(task3);
+
+    session.beginTransaction();
+    session.save(task);
+    session.save(task2);
+    session.save(task3);
+    session.save(event);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Event where id = :eventId")
+        .setParameter("eventId", event.getId());
+    Event lastEvent = (Event) query.getSingleResult();
+
+    List<Integer> ids = Arrays.asList(task.getId(), task2.getId(), task3.getId());
+    List<AcceptCriteria> tasks = session.createQuery("from Task where id in (:taskId)")
+        .setParameter("taskId", ids).list();
+
+    assertEquals(event, lastEvent);
+    assertEquals(tasks, lastEvent.getTasksById());
+    assertEquals(3, tasks.size());
+
+    //Remove Event (with tasks)
+    int removedEventId = event.getId();
+
+    session.beginTransaction();
+    session.remove(event);
+    session.getTransaction().commit();
+
+    tasks = session.createQuery("from Task where id in (:taskId)")
+        .setParameter("taskId", ids).list();
+    assertEquals(0, tasks.size());
+
+    Event eventAfterDelete = (Event) session.get(Event.class, removedEventId);
+    assertNull(eventAfterDelete);
+  }
+
 
   @AfterAll
   public void afterClassFunction() {

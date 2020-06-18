@@ -1,9 +1,12 @@
 package model;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
@@ -12,12 +15,12 @@ public class Event extends Issue {
 
   private String title;
   private Date endDate;
-  private Collection<Task> tasksById;
+  private List<Task> tasksById = new ArrayList<>();
 
   public Event() { //Required by Hibernate
   }
 
-  public Event(String description,String title, Date endDate) {
+  public Event(String description, String title, Date endDate) {
     super(description);
     this.title = title;
     this.endDate = endDate;
@@ -59,12 +62,13 @@ public class Event extends Issue {
     return Objects.hash(title, endDate);
   }
 
-  @OneToMany(mappedBy = "eventByEventId")
-  public Collection<Task> getTasksById() {
+  //deletes parent and orphans - delete tasks with event
+  @OneToMany(mappedBy = "eventByEventId", cascade = CascadeType.ALL)
+  public List<Task> getTasksById() {
     return tasksById;
   }
 
-  public void setTasksById(Collection<Task> tasksById) {
+  public void setTasksById(List<Task> tasksById) {
     this.tasksById = tasksById;
   }
 }
