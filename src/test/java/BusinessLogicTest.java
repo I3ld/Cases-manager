@@ -17,6 +17,8 @@ import model.Company;
 import model.Contract;
 import model.EmployeeIssue;
 import model.Event;
+import model.Issue;
+import model.Issue.IssueStatusType;
 import model.Project;
 import model.RegularEmployee;
 import model.RegularEmployee.RegularEmployeeContractType;
@@ -577,7 +579,6 @@ public class BusinessLogicTest {
     assertNull(eventAfterDelete);
   }
 
-
   @Test
   public void method_isAnyProject() {
     //Insert new project
@@ -596,6 +597,68 @@ public class BusinessLogicTest {
     boolean flag = Project.isAny();
     assertTrue(flag);
   }
+
+  /**
+   * Deputy head gets list of subordinate ordered by open cases assigned to emp.
+   */
+  @Test
+  public void method_DeputyHead_getOrderedSubordinates() throws Exception {
+    List<RegularEmployeeType> type = new ArrayList<>();
+    type.add(RegularEmployeeType.DeputyHead);
+
+    RegularEmployee deputyHead = new RegularEmployee("Alan", "Walker", BigDecimal.valueOf(2445.23),
+        Date.valueOf(LocalDate.parse("2007-12-03")), Arrays.asList("652-352-156", "658-852-245"),
+        RegularEmployeeContractType.Mandate, type);
+
+    type.remove(0);
+    type.add(RegularEmployeeType.Specialist);
+    RegularEmployee specialist = new RegularEmployee("Carl", "Johnson", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, type);
+
+    RegularEmployee specialist2 = new RegularEmployee("Carl2", "Johnson2", BigDecimal.valueOf(4445.50),
+        Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
+        RegularEmployeeContractType.Permanent, type);
+
+    Task task = new Task("task title description test111111", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    Task task2 = new Task("task title description test2222", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    task2.setStatus(IssueStatusType.Done);
+    Task task3 = new Task("task title description test3333", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    task3.setStatus(IssueStatusType.Done);
+    Task task4 = new Task("task title description test44444", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    task4.setStatus(IssueStatusType.Done);
+
+    //specialist : 2 tasks: 1-new, 1-done
+    //specialist2 : 2 tasks: 2-done
+    specialist.addEmployeeIssue(new EmployeeIssue("Cooment1", specialist, task));
+    specialist.addEmployeeIssue(new EmployeeIssue("Cooment2", specialist, task2));
+    specialist2.addEmployeeIssue(new EmployeeIssue("Cooment3", specialist2, task3));
+    specialist2.addEmployeeIssue(new EmployeeIssue("Cooment4", specialist2, task4));
+
+    deputyHead.addSubordinate(specialist);
+    deputyHead.addSubordinate(specialist2);
+
+    session.beginTransaction();
+    session.save(task);
+    session.save(task2);
+    session.save(task3);
+    session.save(task4);
+    session.save(specialist);
+    session.save(specialist2);
+    session.save(deputyHead);
+    session.getTransaction().commit();
+
+    List<RegularEmployee> subordinatesByOpenCases = deputyHead.getSubordinatesOrderedByOpenCases();
+    assertEquals(2,subordinatesByOpenCases.size());
+    assertEquals(specialist2,subordinatesByOpenCases.get(0));
+    assertEquals(specialist,subordinatesByOpenCases.get(1));
+
+  }
+
 
   @AfterAll
   public void afterClassFunction() {

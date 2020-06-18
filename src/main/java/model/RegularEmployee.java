@@ -4,16 +4,20 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import model.Issue.IssueStatusType;
 
 @Entity(name = "RegularEmployee")
 public class RegularEmployee extends Employee {
@@ -94,13 +98,31 @@ public class RegularEmployee extends Employee {
   }
 
   public void setSupervisor(RegularEmployee supervisor) {
-    if(this.supervisor == null && supervisor != null){
+    if (this.supervisor == null && supervisor != null) {
       this.supervisor = supervisor;
       supervisor.addSubordinate(this); //reverse connection
-    }else if(this.supervisor != null && !this.supervisor.equals(supervisor)){
+    } else if (this.supervisor != null && !this.supervisor.equals(supervisor)) {
       this.supervisor.getSubordinates().remove(this); //remove previous connection
       this.supervisor = supervisor;
       supervisor.addSubordinate(this); //reverse connection
+    }
+  }
+
+  @Transient
+  public List<RegularEmployee> getSubordinatesOrderedByOpenCases() throws Exception {
+    if (this.regularEmployeeType.contains(RegularEmployeeType.DeputyHead)) {
+      Comparator<RegularEmployee> casesComparator = (e1, e2) -> Long.compare(e2.getEmployeeIssues()
+              .stream()
+              .filter(is -> is.getIssue().getStatus().equals(IssueStatusType.Done)).count(),
+          e1.getEmployeeIssues().stream()
+              .filter(is -> is.getIssue().getStatus().equals(IssueStatusType.Done)).count());
+
+      return subordinates.stream()
+          .filter(emp -> emp.getEmployeeIssues().size() > 0)
+          .sorted(casesComparator)
+          .collect(Collectors.toCollection(ArrayList::new));
+    } else {
+      throw new Exception("Employee must be Deputy Head to get subordinates!");
     }
   }
 
