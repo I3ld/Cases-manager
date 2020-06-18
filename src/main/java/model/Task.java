@@ -2,12 +2,11 @@ package model;
 
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -77,7 +76,8 @@ public class Task extends Issue {
     return Objects.hash(title, priority, dueToDate);
   }
 
-  @OneToMany(mappedBy = "taskByTaskId")
+  //deletes parent and orphans - delete all acc criteria with task
+  @OneToMany(mappedBy = "taskByTaskId", cascade = CascadeType.ALL)
   public List<AcceptCriteria> getAcceptCriteriaById() {
     return acceptCriteriaById;
   }

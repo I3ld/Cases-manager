@@ -1,5 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import model.AcceptCriteria;
 import model.Boss;
@@ -408,7 +410,8 @@ public class BusinessLogicTest {
    * TEST - association recursive RegularEmployee[1] - RegularEmployee[1..*]: Insert deputy head,
    * Insert specialist, add Subordinate for deputy head , verify data.
    *
-   * Insert new deputy head, set new deputy head for specialist assigned to deputy head nr1 before, verify data.
+   * Insert new deputy head, set new deputy head for specialist assigned to deputy head nr1 before,
+   * verify data.
    */
   @Test
   public void associationRecursive_SupervisorSubordinates_2() {
@@ -466,6 +469,55 @@ public class BusinessLogicTest {
     assertEquals(0, deputyHeadDb.getSubordinates().size());
     assertEquals(1, deputyHeadDb2.getSubordinates().size());
     assertEquals(0, specialist.getSubordinates().size());
+  }
+
+  /**
+   * TEST - association composition Task - AcceptCritera: Insert task, insert acc criteria, add criteria to task, delete task,
+   * check acc criteria assigned to task also are deleted.
+   */
+  @Test
+  public void composition_TaskAccCriteria_DeleteParentOrphans() {
+    Task task = new Task("task title description test222", "task title test222", 1,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    AcceptCriteria acc = new AcceptCriteria("Acc criteria test description22");
+    AcceptCriteria acc2 = new AcceptCriteria("Acc criteria test description33");
+    AcceptCriteria acc3 = new AcceptCriteria("Acc criteria test description444");
+
+    task.getAcceptCriteriaById().add(acc);
+    task.getAcceptCriteriaById().add(acc2);
+    task.getAcceptCriteriaById().add(acc3);
+
+    session.beginTransaction();
+    session.save(acc);
+    session.save(acc2);
+    session.save(acc3);
+    session.save(task);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Task where id = :taskId")
+        .setParameter("taskId", task.getId());
+    Task lastTask = (Task) query.getSingleResult();
+
+    List<Integer> ids = Arrays.asList(acc.getId(),acc2.getId(),acc3.getId());
+    List<AcceptCriteria> taskAccCriteria = session.createQuery("from AcceptCriteria where id in (:AcceptCriteriaId)")
+        .setParameter("AcceptCriteriaId",ids ).list();
+
+    assertEquals(task, lastTask);
+    assertEquals(taskAccCriteria, lastTask.getAcceptCriteriaById());
+
+    //Remove Task (with acc)
+    int removedTaskId = task.getId();
+
+    session.beginTransaction();
+    session.remove(task);
+    session.getTransaction().commit();
+
+    taskAccCriteria = session.createQuery("from AcceptCriteria where id = :AcceptCriteriaId")
+        .setParameter("AcceptCriteriaId", acc.getId()).list();
+    assertEquals(0,taskAccCriteria.size());
+
+    Task taskAfterDelete = (Task) session.get(Task.class, removedTaskId);
+    assertNull(taskAfterDelete);
   }
 
   @AfterAll

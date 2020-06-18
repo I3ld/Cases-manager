@@ -1,6 +1,5 @@
 package model;
 
-import java.sql.Date;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
