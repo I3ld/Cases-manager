@@ -2,6 +2,8 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -123,6 +125,17 @@ public class RegularEmployee extends Employee {
           .collect(Collectors.toCollection(ArrayList::new));
     } else {
       throw new Exception("Employee must be Deputy Head to get subordinates!");
+    }
+  }
+
+  //get deputy head seniority in years (i.a. needed to count extra bonus)
+  @Transient
+  public int getSeniorityYears() throws Exception {
+    if (this.getRegularEmployeeType().contains(RegularEmployeeType.DeputyHead)) {
+      LocalDate now = LocalDate.now();
+      return Period.between(super.getEmploymentDate().toLocalDate(), now).getYears();
+    } else {
+      throw new Exception("Employee must be Deputy Head to get seniority!");
     }
   }
 
