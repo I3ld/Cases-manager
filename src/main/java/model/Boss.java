@@ -3,7 +3,6 @@ package model;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
@@ -53,6 +52,15 @@ public class Boss extends Employee {
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), budget, contracts);
+  }
+
+  //Boss extra bonus - 2% of current budget
+  @Override
+  public BigDecimal countExtraBonus(int workedHours) {
+    if (workedHours > 80 && budget.compareTo(BigDecimal.ZERO) > 0) {
+      return budget.multiply(new BigDecimal(2)).movePointLeft(2);
+    }
+    return BigDecimal.valueOf(0);
   }
 
   @OneToMany(mappedBy = "boss")

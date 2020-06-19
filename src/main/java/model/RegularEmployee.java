@@ -25,7 +25,7 @@ import model.Issue.IssueStatusType;
 public class RegularEmployee extends Employee {
 
   //Specialist attributes
-  private static int minHoursToWork = 150; //for all specialists
+  private static int minHoursToWork = 150; //for all regular emps
   private RegularEmployee supervisor;
 
   //Deputy Head attributes
@@ -162,6 +162,19 @@ public class RegularEmployee extends Employee {
   public int hashCode() {
     return Objects.hash(super.hashCode(), supervisor, promotionDate, subordinates, typeOfContract,
         regularEmployeeType);
+  }
+
+  @Override
+  public BigDecimal countExtraBonus(int workedHours) throws Exception {
+    if (workedHours > minHoursToWork) {
+      if (this.getRegularEmployeeType().contains(RegularEmployeeType.DeputyHead)) {
+        return BigDecimal.valueOf(getSeniorityYears() * 250);
+      } else if (this.getRegularEmployeeType().contains(RegularEmployeeType.Specialist) && !this
+          .getRegularEmployeeType().contains(RegularEmployeeType.DeputyHead)) {
+        return BigDecimal.valueOf(workedHours * 3);
+      }
+    }
+    return BigDecimal.valueOf(0);
   }
 
   public enum RegularEmployeeType {DeputyHead, Specialist}

@@ -3,7 +3,6 @@ package model;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
@@ -44,6 +43,13 @@ public abstract class Employee {
     this.salary = salary;
     this.employmentDate = employmentDate;
     this.phoneNumbers = phoneNumbers;
+  }
+
+  @Transient
+  public static List<Employee> getEmploeesByProject(Project project) {
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    return session.createQuery("from Employee where project = :project")
+        .setParameter("project", project).list();
   }
 
   @Id
@@ -131,10 +137,10 @@ public abstract class Employee {
   }
 
   public void setProject(Project project) {
-    if(this.project == null && project != null){
+    if (this.project == null && project != null) {
       this.project = project;
       project.addEmployee(this); //reverse connection
-    }else if(project != null && !this.project.equals(project)){
+    } else if (project != null && !this.project.equals(project)) {
       this.project = project;
       project.addEmployee(this); //reverse connection
     }
@@ -157,10 +163,5 @@ public abstract class Employee {
     }
   }
 
-  @Transient
-  public static List<Employee> getEmploeesByProject(Project project){
-    Session session = HibernateUtil.getSessionFactory().openSession();
-    return session.createQuery("from Employee where project = :project")
-        .setParameter("project", project).list();
-  }
+  abstract public BigDecimal countExtraBonus(int workedHours) throws Exception;
 }
