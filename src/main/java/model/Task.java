@@ -94,4 +94,14 @@ public class Task extends Issue {
   public void setEventByEventId(Event eventByEventId) {
     this.eventByEventId = eventByEventId;
   }
+
+  @Override
+  public String toString() {
+    return
+        "ID: " + getId() +
+        " Title: '" + title + '\'' +
+        " Description: " + getDescription() +
+        ", Priority: " + priority +
+        ", DueToDate: " + dueToDate;
+  }
 }
