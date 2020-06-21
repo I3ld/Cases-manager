@@ -21,7 +21,6 @@ public class TaskController {
     List<Task> tasks = session.createQuery(cq).getResultList();
     session.close();
     return tasks;
-
   }
 
   public boolean deleteTask(List<Task> tasks) {

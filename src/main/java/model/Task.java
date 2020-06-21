@@ -7,6 +7,7 @@ import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -77,7 +78,7 @@ public class Task extends Issue {
   }
 
   //deletes parent and orphans - delete all acc criteria with task
-  @OneToMany(mappedBy = "taskByTaskId", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "taskByTaskId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public List<AcceptCriteria> getAcceptCriteriaById() {
     return acceptCriteriaById;
   }
@@ -99,9 +100,11 @@ public class Task extends Issue {
   public String toString() {
     return
         "ID: " + getId() +
-        " Title: '" + title + '\'' +
-        " Description: " + getDescription() +
-        ", Priority: " + priority +
-        ", DueToDate: " + dueToDate;
+            " Title: '" + title + '\'' +
+            " Description: " + getDescription() +
+            ", Priority: " + priority +
+            ", CreateDate: " + getCreateDate() +
+            ", DueToDate: " + dueToDate +
+            " State: " + getStatus();
   }
 }

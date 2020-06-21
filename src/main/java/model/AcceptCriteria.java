@@ -44,4 +44,12 @@ public class AcceptCriteria extends Issue {
   public void setTaskByTaskId(Task taskByTaskId) {
     this.taskByTaskId = taskByTaskId;
   }
+
+  @Override
+  public String toString() {
+    return "ID: " + getId() +
+        " Description: " + getDescription() +
+        ", CreateDate: " + getCreateDate() +
+        " State: " + getStatus();
+  }
 }
