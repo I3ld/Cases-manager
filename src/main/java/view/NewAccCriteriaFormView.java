@@ -19,6 +19,7 @@ public class NewAccCriteriaFormView extends JFrame {
   public NewAccCriteriaFormView(NewTaskFormView parentFrame) {
     this.parentFrame = parentFrame;
     setUpAddButtonListeners();
+    setUpCancelButtonListeners();
     initView();
   }
 
@@ -38,6 +39,12 @@ public class NewAccCriteriaFormView extends JFrame {
         parentFrame.setUpAccCriteriaSource();
         dispose();
       }
+    });
+  }
+
+  public void setUpCancelButtonListeners() {
+    cancelButton.addActionListener(e -> {
+      dispose();
     });
   }
 
