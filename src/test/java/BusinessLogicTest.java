@@ -68,7 +68,7 @@ public class BusinessLogicTest {
     session.save(project);
     session.save(task);
     session.save(acc);
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
     project.addIssueQualified(task);
     project.addIssueQualified(acc);
     session.save(project);
@@ -124,7 +124,7 @@ public class BusinessLogicTest {
     session.save(project);
     session.save(task);
     session.save(acc);
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
     project.addIssueQualified(task);
     project.addIssueQualified(acc);
     session.save(project);
@@ -233,7 +233,7 @@ public class BusinessLogicTest {
     session.save(deputyHeadIssue);
     session.save(deputySpecialistIssue);
     session.save(acc);
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
     session.save(task);
     session.getTransaction().commit();
 
@@ -277,7 +277,7 @@ public class BusinessLogicTest {
     session.save(task);
     session.save(deputyHeadIssue);
     session.save(acc);
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
     session.save(task);
     deputyHead.addEmployeeIssue(deputyHeadIssue);
     session.save(deputyHead);
@@ -486,9 +486,9 @@ public class BusinessLogicTest {
     AcceptCriteria acc2 = new AcceptCriteria("Acc criteria test description33");
     AcceptCriteria acc3 = new AcceptCriteria("Acc criteria test description444");
 
-    task.getAcceptCriteriaById().add(acc);
-    task.getAcceptCriteriaById().add(acc2);
-    task.getAcceptCriteriaById().add(acc3);
+    task.addAcceptCriteria(acc);
+    task.addAcceptCriteria(acc2);
+    task.addAcceptCriteria(acc3);
 
     session.beginTransaction();
     session.save(acc);

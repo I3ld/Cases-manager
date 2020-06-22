@@ -188,7 +188,7 @@ public class OrmTest {
         Date.valueOf(LocalDate.parse("2021-12-06")));
     AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
 
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
 
     session.beginTransaction();
     session.save(task);
@@ -220,7 +220,7 @@ public class OrmTest {
         Date.valueOf(LocalDate.parse("2017-12-03")), Arrays.asList("625-856-963", "563-845-852"),
         RegularEmployeeContractType.Permanent, type);
 
-    task.getAcceptCriteriaById().add(acc);
+    task.addAcceptCriteria(acc);
     EmployeeIssue empIssue = new EmployeeIssue("Workaround - need to rewatch", deputyHead, task);
     empIssue.setIssue(task);
     empIssue.setEmployee(specialist);
