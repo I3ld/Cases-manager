@@ -2,6 +2,8 @@ package view;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -12,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import model.AcceptCriteria;
 import model.Project;
 import model.Task;
 import net.sourceforge.jdatepicker.JDatePicker;
@@ -27,7 +30,6 @@ public class NewTaskFormView extends JFrame {
   private JButton deleteAccBtn;
   private JButton cancelTaskBtn;
   private JButton saveTaskBtn;
-  private JButton resetTaskBtn;
   private JList accCriteriaJList;
   private JComboBox comboBox1;
   private JTextField textField1;
@@ -47,9 +49,14 @@ public class NewTaskFormView extends JFrame {
   private ButtonGroup priorityButtonGroup;
 
   private Task newTask;
+  private List<AcceptCriteria> acceptCriterias = new ArrayList<>();
+  private MyAccCriteriaListModel accListModel;
 
   public NewTaskFormView() {
     setUpComboBoxProjectSource();
+    setUpAccCriteriaSource();
+    setUpAccDeleteButtonListeners();
+    setUpAddAccCriteriaListeners();
     initView();
   }
 
@@ -82,7 +89,7 @@ public class NewTaskFormView extends JFrame {
 
   //Validate data for new Task
   //Project,Title,Description,Priority,DueToDate
-  public void verifyNewTaskDetails() {
+  public boolean verifyNewTaskDetails() {
     try {
       //project
       Project project = (Project) comboBox1.getSelectedItem();
@@ -94,9 +101,9 @@ public class NewTaskFormView extends JFrame {
       Date selectedDate = (java.sql.Date) dueToDatePicker.getModel().getValue();
 
       //Title
-      String titleTask = null;
+      String titleTask;
       //Description
-      String descriptionTask = null;
+      String descriptionTask;
 
       if (!titleLabel.getText().isEmpty() && titleLabel.getText() != null) {
         titleTask = titleLabel.getText();
@@ -107,10 +114,39 @@ public class NewTaskFormView extends JFrame {
           //Crete new task and set project
           newTask = new Task(descriptionTask, titleTask, priority, selectedDate);
           newTask.setProject(project);
+          return true;
         }
       }
     } catch (Exception e) {
       System.err.println("Create new task error validation!");
+      return false;
     }
+    return false;
+  }
+
+  //Button add new acc criteria - set listener to open new form
+  private void setUpAddAccCriteriaListeners(){
+    addAccBtn.addActionListener(e -> new NewAccCriteriaFormView(this));
+  }
+
+  public void setUpAccCriteriaSource(){
+    accListModel = new MyAccCriteriaListModel(acceptCriterias);
+    accCriteriaJList.setModel(accListModel);
+    accCriteriaJList.repaint();
+  }
+
+  //DeleteAcc button - listeners
+  private void setUpAccDeleteButtonListeners(){
+    deleteAccBtn.addActionListener(e -> {
+      if(!accCriteriaJList.isSelectionEmpty()){
+        List<AcceptCriteria> selectedAcc = (List<AcceptCriteria>) accCriteriaJList.getSelectedValuesList();
+        acceptCriterias.removeAll(selectedAcc);
+        setUpAccCriteriaSource();
+      }
+    });
+  }
+
+  public List<AcceptCriteria> getAcceptCriterias() {
+    return acceptCriterias;
   }
 }
