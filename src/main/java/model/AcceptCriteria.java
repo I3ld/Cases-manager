@@ -42,6 +42,13 @@ public class AcceptCriteria extends Issue {
   }
 
   public void setTaskByTaskId(Task taskByTaskId) {
+    if (this.taskByTaskId == null && taskByTaskId != null) {
+      this.taskByTaskId = taskByTaskId;
+      taskByTaskId.addAcceptCriteria(this); //reverse connection
+    } else if (taskByTaskId != null && !this.taskByTaskId.equals(taskByTaskId)) {
+      this.taskByTaskId = taskByTaskId;
+      taskByTaskId.addAcceptCriteria(this); //reverse connection
+    }
     this.taskByTaskId = taskByTaskId;
   }
 }

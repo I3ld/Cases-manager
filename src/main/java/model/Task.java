@@ -86,6 +86,14 @@ public class Task extends Issue {
     this.acceptCriteriaById = acceptCriteriaById;
   }
 
+  public void addAcceptCriteria(AcceptCriteria acc){
+    if(!acceptCriteriaById.contains(acc)){
+      acceptCriteriaById.add(acc);
+
+      acc.setTaskByTaskId(this); //reverse connection
+    }
+  }
+
   @ManyToOne
   public Event getEventByEventId() {
     return eventByEventId;
