@@ -243,10 +243,10 @@
   </grid>
   <buttonGroups>
     <group name="priorityButtonGroup">
-      <member id="94803"/>
       <member id="1cc1e"/>
       <member id="660bd"/>
       <member id="703ae"/>
+      <member id="94803"/>
     </group>
   </buttonGroups>
 </form>
