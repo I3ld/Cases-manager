@@ -11,9 +11,6 @@ public class TaskController {
 
   Session session;
 
-  public TaskController() {
-  }
-
   public List getAllTasks() {
     session = HibernateUtil.getSessionFactory().openSession();
     CriteriaQuery cq = session.getCriteriaBuilder().createQuery(Task.class);

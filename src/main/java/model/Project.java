@@ -179,4 +179,14 @@ public class Project {
       issue.setProject(this);
     }
   }
+
+  @Override
+  public String toString() {
+    return
+        "Name: '" + name + '\'' +
+        ", Description: " + description + '\'' +
+        ", Create Date: " + createDate +
+        ", Budget: " + budget +
+        ", Expected end date: " + expectedEndDate;
+  }
 }

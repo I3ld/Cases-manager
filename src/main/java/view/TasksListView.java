@@ -22,7 +22,7 @@ public class TasksListView extends JFrame {
   private JButton editButton;
   private JButton deleteButton;
   private JLabel infoUpLabel;
-  private JPanel mainPane;
+  private JPanel buttonsPane;
   private JList allAccCriteriaList;
 
   private TaskController taskController = new TaskController();
@@ -34,6 +34,7 @@ public class TasksListView extends JFrame {
     setUpAccCriteriaListData();
     setUpTasksListListener();
     setUpDeleteListeners();
+    setUpAddButtonListeners();
     initView();
   }
 
@@ -73,6 +74,13 @@ public class TasksListView extends JFrame {
       listAccCriteriaModel = new MyAccCriteriaListModel(accCriteriaList);
       allAccCriteriaList.setModel(listAccCriteriaModel);
       allAccCriteriaList.repaint();
+    });
+  }
+
+  //Add button - listeners - open new form for new task
+  public void setUpAddButtonListeners(){
+    addButton.addActionListener(e -> {
+      NewTaskFormView mainTasksFram = new NewTaskFormView();
     });
   }
 
