@@ -43,9 +43,7 @@ public class NewAccCriteriaFormView extends JFrame {
   }
 
   public void setUpCancelButtonListeners() {
-    cancelButton.addActionListener(e -> {
-      dispose();
-    });
+    cancelButton.addActionListener(e -> dispose());
   }
 
 }

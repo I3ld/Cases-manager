@@ -12,8 +12,8 @@ public class Main {
     /*Session session = HibernateUtil.getSessionFactory().openSession();
     List<RegularEmployee> emps = session.createQuery("from RegularEmployee").list();*/
 
-    //TasksListView mainTasksFrame = new TasksListView();
-    NewTaskFormView mainTasksFram = new NewTaskFormView();
+    TasksListView mainTasksFrame = new TasksListView();
+    //NewTaskFormView mainTasksFram = new NewTaskFormView();
 
 
   }

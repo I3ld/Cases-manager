@@ -1,15 +1,18 @@
 package view;
 
-import java.sql.Date;
+import controller.TaskController;
+import java.util.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import javax.swing.ButtonGroup;
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -32,12 +35,12 @@ public class NewTaskFormView extends JFrame {
   private JButton saveTaskBtn;
   private JList accCriteriaJList;
   private JComboBox comboBox1;
-  private JTextField textField1;
+  private JTextField titleTextField;
   private JRadioButton priority0RadioBtn;
   private JRadioButton priority1RadioBtn;
   private JRadioButton priority2RadioBtn;
   private JRadioButton priority3RadioBtn;
-  private JTextField textField2;
+  private JTextField descriptionTextField;
   private JPanel mainPane;
   private JDatePanelImpl jDatePanelImpl;
   private JLabel projectLabel;
@@ -46,15 +49,24 @@ public class NewTaskFormView extends JFrame {
   private JLabel priorityLabel;
   private JLabel dueToDateLabel;
   private JDatePicker dueToDatePicker;
-  private ButtonGroup priorityButtonGroup;
 
-  private Task newTask;
   private List<AcceptCriteria> acceptCriterias = new ArrayList<>();
   private MyAccCriteriaListModel accListModel;
+  private TasksListView parentFrame;
 
-  public NewTaskFormView() {
+  //New task data
+  private Project project;
+  private int priority;
+  private Date selectedDate;
+  private String titleTask;
+  private String descriptionTask;
+
+  public NewTaskFormView(TasksListView parentFrame) {
+    this.parentFrame = parentFrame;
     setUpComboBoxProjectSource();
     setUpAccCriteriaSource();
+    setUpCancelButtonListeners();
+    setUpSaveTaskButtonListeners();
     setUpAccDeleteButtonListeners();
     setUpAddAccCriteriaListeners();
     initView();
@@ -89,61 +101,114 @@ public class NewTaskFormView extends JFrame {
 
   //Validate data for new Task
   //Project,Title,Description,Priority,DueToDate
-  public boolean verifyNewTaskDetails() {
+  public boolean validateNewTaskDetails() {
     try {
-      //project
-      Project project = (Project) comboBox1.getSelectedItem();
+      //Project
+      project = (Project) comboBox1.getSelectedItem();
 
       //Priority
-      int priority = Integer.parseInt(priorityButtonGroup.getSelection().getActionCommand());
+      JRadioButton radioBtnSelected = Arrays.asList(priority0RadioBtn, priority1RadioBtn, priority2RadioBtn, priority3RadioBtn)
+          .stream().filter(AbstractButton::isSelected).findFirst().orElse(null);
+
+      priority = Integer.parseInt(radioBtnSelected.getText());
 
       //DueToDate
-      Date selectedDate = (java.sql.Date) dueToDatePicker.getModel().getValue();
+      selectedDate = (Date)(dueToDatePicker.getModel().getValue()) ;
 
       //Title
-      String titleTask;
-      //Description
-      String descriptionTask;
+      if(selectedDate.after(new Date())) {
+        if (!titleTextField.getText().isEmpty() && titleTextField.getText() != null) {
+          titleTask = titleTextField.getText();
 
-      if (!titleLabel.getText().isEmpty() && titleLabel.getText() != null) {
-        titleTask = titleLabel.getText();
-
-        if (!descriptionLabel.getText().isEmpty() && descriptionLabel.getText() != null) {
-          descriptionTask = descriptionLabel.getText();
-
-          //Crete new task and set project
-          newTask = new Task(descriptionTask, titleTask, priority, selectedDate);
-          newTask.setProject(project);
-          return true;
+          //Description
+          if (!descriptionTextField.getText().isEmpty() && descriptionTextField.getText() != null) {
+            descriptionTask = descriptionTextField.getText();
+            return true;
+          }
         }
       }
     } catch (Exception e) {
+      JOptionPane.showMessageDialog(
+          null,
+          "Validation error! Please correct task input details.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE);
       System.err.println("Create new task error validation!");
+      e.printStackTrace();
       return false;
     }
     return false;
   }
 
-  //Button add new acc criteria - set listener to open new form
-  private void setUpAddAccCriteriaListeners(){
-    addAccBtn.addActionListener(e -> new NewAccCriteriaFormView(this));
+  //Validate data for new Acc
+  private boolean validateNewAccDetails() {
+    if (!acceptCriterias.isEmpty()) {
+      return true;
+    } else {
+      JOptionPane.showMessageDialog(
+          null,
+          "Validation error! Acc list cannot be empty.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE);
+      System.err.println("Validation error. Cannot save Task. Acc list is empty.");
+      return false;
+    }
   }
 
-  public void setUpAccCriteriaSource(){
+  public void setUpAccCriteriaSource() {
     accListModel = new MyAccCriteriaListModel(acceptCriterias);
     accCriteriaJList.setModel(accListModel);
     accCriteriaJList.repaint();
   }
 
+  //Save button - listener(with process )
+  public void setUpSaveTaskButtonListeners() {
+    saveTaskBtn.addActionListener(e -> {
+      if (validateNewAccDetails() && validateNewTaskDetails()) {
+        //Crete new task and set project
+        Task newTask = new Task(descriptionTask, titleTask, priority, new java.sql.Date(selectedDate.getTime()));
+        newTask.setProject(project);
+
+        TaskController taskController = new TaskController();
+
+        for (AcceptCriteria acc : acceptCriterias) {
+          acc.setProject(project);
+          newTask.addAcceptCriteria(acc);
+        }
+
+        taskController.addTask(newTask); //save new task to DB
+        dispose();
+        parentFrame.setUpTasksListData(); //refresh parent - tasks list
+      }else{
+        JOptionPane.showMessageDialog(
+            null,
+            "Validation error! Please correct task input details.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    });
+  }
+
+  //Button add new acc criteria - set listener to open new form
+  private void setUpAddAccCriteriaListeners() {
+    addAccBtn.addActionListener(e -> new NewAccCriteriaFormView(this));
+  }
+
   //DeleteAcc button - listeners
-  private void setUpAccDeleteButtonListeners(){
+  private void setUpAccDeleteButtonListeners() {
     deleteAccBtn.addActionListener(e -> {
-      if(!accCriteriaJList.isSelectionEmpty()){
-        List<AcceptCriteria> selectedAcc = (List<AcceptCriteria>) accCriteriaJList.getSelectedValuesList();
+      if (!accCriteriaJList.isSelectionEmpty()) {
+        List<AcceptCriteria> selectedAcc = (List<AcceptCriteria>) accCriteriaJList
+            .getSelectedValuesList();
         acceptCriterias.removeAll(selectedAcc);
         setUpAccCriteriaSource();
       }
     });
+  }
+
+  //Cancel button action - Close window
+  private void setUpCancelButtonListeners() {
+    cancelTaskBtn.addActionListener(e -> dispose());
   }
 
   public List<AcceptCriteria> getAcceptCriterias() {

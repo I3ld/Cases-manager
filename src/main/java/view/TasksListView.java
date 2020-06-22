@@ -80,7 +80,7 @@ public class TasksListView extends JFrame {
   //Add button - listeners - open new form for new task
   public void setUpAddButtonListeners(){
     addButton.addActionListener(e -> {
-      NewTaskFormView mainTasksFram = new NewTaskFormView();
+      NewTaskFormView mainTasksFram = new NewTaskFormView(this);
     });
   }
 
