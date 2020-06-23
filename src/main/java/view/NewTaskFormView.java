@@ -1,11 +1,11 @@
 package view;
 
 import controller.TaskController;
-import java.util.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -29,7 +29,6 @@ public class NewTaskFormView extends JFrame {
 
   private JLabel topInfoLabel;
   private JButton addAccBtn;
-  private JButton editAccBtn;
   private JButton deleteAccBtn;
   private JButton cancelTaskBtn;
   private JButton saveTaskBtn;
@@ -107,16 +106,17 @@ public class NewTaskFormView extends JFrame {
       project = (Project) comboBox1.getSelectedItem();
 
       //Priority
-      JRadioButton radioBtnSelected = Arrays.asList(priority0RadioBtn, priority1RadioBtn, priority2RadioBtn, priority3RadioBtn)
-          .stream().filter(AbstractButton::isSelected).findFirst().orElse(null);
+      JRadioButton radioBtnSelected = Stream
+          .of(priority0RadioBtn, priority1RadioBtn, priority2RadioBtn, priority3RadioBtn)
+          .filter(AbstractButton::isSelected).findFirst().orElse(null);
 
       priority = Integer.parseInt(radioBtnSelected.getText());
 
       //DueToDate
-      selectedDate = (Date)(dueToDatePicker.getModel().getValue()) ;
+      selectedDate = (Date) (dueToDatePicker.getModel().getValue());
 
       //Title
-      if(selectedDate.after(new Date())) {
+      if (selectedDate.after(new Date())) {
         if (!titleTextField.getText().isEmpty() && titleTextField.getText() != null) {
           titleTask = titleTextField.getText();
 
@@ -166,7 +166,8 @@ public class NewTaskFormView extends JFrame {
     saveTaskBtn.addActionListener(e -> {
       if (validateNewAccDetails() && validateNewTaskDetails()) {
         //Crete new task and set project
-        Task newTask = new Task(descriptionTask, titleTask, priority, new java.sql.Date(selectedDate.getTime()));
+        Task newTask = new Task(descriptionTask, titleTask, priority,
+            new java.sql.Date(selectedDate.getTime()));
         newTask.setProject(project);
 
         TaskController taskController = new TaskController();
@@ -179,7 +180,7 @@ public class NewTaskFormView extends JFrame {
         taskController.addTask(newTask); //save new task to DB
         dispose();
         parentFrame.setUpTasksListData(); //refresh parent - tasks list
-      }else{
+      } else {
         JOptionPane.showMessageDialog(
             null,
             "Validation error! Please correct task input details.",

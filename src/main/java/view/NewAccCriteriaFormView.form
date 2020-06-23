@@ -24,7 +24,7 @@
             </constraints>
             <properties>
               <font name="Arial Rounded MT Bold" size="28" style="0"/>
-              <text value="New acceptance criteria"/>
+              <text value="Add new criteria"/>
             </properties>
           </component>
         </children>

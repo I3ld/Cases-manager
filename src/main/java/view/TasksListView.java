@@ -35,6 +35,7 @@ public class TasksListView extends JFrame {
     setUpTasksListListener();
     setUpDeleteListeners();
     setUpAddButtonListeners();
+    setUpEditTaskButtonListeners();
     initView();
   }
 
@@ -122,4 +123,12 @@ public class TasksListView extends JFrame {
     }
   }
 
+  //Edit task button - set listeners
+  private void setUpEditTaskButtonListeners() {
+    editButton.addActionListener(e -> {
+      if(!allTasksList.isSelectionEmpty()){
+        new TaskEditFormView((Task) allTasksList.getSelectedValue());
+      }
+    });
+  }
 }
