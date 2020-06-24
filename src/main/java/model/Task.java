@@ -78,7 +78,7 @@ public class Task extends Issue {
   }
 
   //deletes parent and orphans - delete all acc criteria with task
-  @OneToMany(mappedBy = "taskByTaskId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "taskByTaskId", orphanRemoval=true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public List<AcceptCriteria> getAcceptCriteriaById() {
     return acceptCriteriaById;
   }

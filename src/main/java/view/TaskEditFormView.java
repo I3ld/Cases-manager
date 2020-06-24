@@ -1,5 +1,6 @@
 package view;
 
+import controller.TaskController;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.stream.Stream;
@@ -15,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import model.AcceptCriteria;
 import model.Issue.IssueStatusType;
 import model.Project;
 import model.Task;
@@ -72,6 +74,7 @@ public class TaskEditFormView extends JFrame {
     setUpTaskProjectComboBoxSource();
     setUpTaskStatusComboBoxSource();
     setUpCancelButtonListeners();
+    setUpAccCriteriaDeleteButtonListeners();
     windowCloseListeners();
     setUpUpdateTaskButtonListeners();
     setUpAddAccButtonListeners();
@@ -139,7 +142,6 @@ public class TaskEditFormView extends JFrame {
 
     //Acc criteria list
     setUpAccCriteriaSource();
-
   }
 
   //Add acc button - listeners
@@ -169,6 +171,18 @@ public class TaskEditFormView extends JFrame {
     dueToDatePicker = new JDatePickerImpl(jDatePanelImpl);
   }
 
+  //Delete acc criteria button - listeners
+  private void setUpAccCriteriaDeleteButtonListeners(){
+    deleteAccBtn.addActionListener(e -> {
+      AcceptCriteria accSelected = null;
+      if(!accCriteriaJList.isSelectionEmpty()){
+       accSelected = (AcceptCriteria) accCriteriaJList.getSelectedValue();
+        session.remove(accSelected);
+        accListModel.source.remove(accSelected); //workaround - acc remove not committed yet
+        accCriteriaJList.repaint();
+      }
+    });
+  }
 
   //Update button - listener - save updated task
   private void setUpUpdateTaskButtonListeners() {
@@ -181,14 +195,19 @@ public class TaskEditFormView extends JFrame {
         taskToEdit.setTitle(title);
         //Description
         taskToEdit.setDescription(description);
+        //Priority
+        taskToEdit.setPriority(Integer.parseInt(radioBtnSelected.getText()));
         //Status
         taskToEdit.setStatus((IssueStatusType) statusComboBox.getSelectedItem());
         //DueToDate
         taskToEdit.setDueToDate(new java.sql.Date(selectedDate.getTime()));
 
-        session.getTransaction().commit();
+        new TaskController().updateTask(taskToEdit);
+
+        session.getTransaction().commit(); //acc changes session
         session.close();
-        parenView.setUpTasksListData();
+        parenView.getAllTasksList().repaint(); //refresh changes acc list in tasks list view
+        dispose();
       }
     });
   }

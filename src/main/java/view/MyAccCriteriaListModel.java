@@ -22,4 +22,8 @@ public class MyAccCriteriaListModel extends AbstractListModel {
   public Object getElementAt(int index) {
     return source.get(index);
   }
+
+  public List<AcceptCriteria> getSource() {
+    return source;
+  }
 }

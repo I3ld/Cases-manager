@@ -58,12 +58,11 @@ public class TasksListView extends JFrame {
 
   //JList acc - set source
   public void setUpAccCriteriaListData() {
-    Task currentTask = (Task) listTasksModel.getElementAt(0);
+    Task currentTask = (Task) allTasksList.getSelectedValue();
     List<AcceptCriteria> accCriteriaList = currentTask.getAcceptCriteriaById();
 
     listAccCriteriaModel = new MyAccCriteriaListModel(accCriteriaList);
     allAccCriteriaList.setModel(listAccCriteriaModel);
-    allAccCriteriaList.repaint();
   }
 
   //Jlist tasks - value changed selected
@@ -81,7 +80,7 @@ public class TasksListView extends JFrame {
   //Add button - listeners - open new form for new task
   public void setUpAddButtonListeners(){
     addButton.addActionListener(e -> {
-      NewTaskFormView mainTasksFram = new NewTaskFormView(this);
+      new NewTaskFormView(this);
     });
   }
 
@@ -134,5 +133,9 @@ public class TasksListView extends JFrame {
 
   public JList getAllTasksList() {
     return allTasksList;
+  }
+
+  public MyAccCriteriaListModel getListAccCriteriaModel() {
+    return listAccCriteriaModel;
   }
 }
