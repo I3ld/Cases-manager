@@ -115,8 +115,8 @@ public class NewTaskFormView extends JFrame {
       //DueToDate
       selectedDate = (Date) (dueToDatePicker.getModel().getValue());
 
-      //Title
       if (selectedDate.after(new Date())) {
+        //Title
         if (!titleTextField.getText().isEmpty() && titleTextField.getText() != null) {
           titleTask = titleTextField.getText();
 

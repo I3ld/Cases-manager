@@ -52,6 +52,16 @@ public class TaskController {
     }
   }
 
+  public boolean updateTaskWithoutCommit(Task task, Session session) {
+    try {
+      session.update(task);
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
   public boolean addTask(Task task) {
     session = HibernateUtil.getSessionFactory().openSession();
     try {
@@ -65,5 +75,6 @@ public class TaskController {
     } finally {
       session.close();
     }
+
   }
 }

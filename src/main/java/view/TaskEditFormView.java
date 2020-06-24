@@ -3,22 +3,27 @@ package view;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.stream.Stream;
+import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import model.Issue.IssueStatusType;
+import model.Project;
 import model.Task;
 import net.sourceforge.jdatepicker.JDatePicker;
 import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
 import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
 import net.sourceforge.jdatepicker.impl.UtilDateModel;
+import org.hibernate.Session;
+import util.HibernateUtil;
 
 public class TaskEditFormView extends JFrame {
 
@@ -46,17 +51,30 @@ public class TaskEditFormView extends JFrame {
   private JRadioButton priority3RadioBtn;
   private JDatePicker dueToDatePicker;
 
-  private MyAccCriteriaListModel accListModel;
 
+  private TasksListView parenView;
   private Task taskToEdit;
   private UtilDateModel jDateModel;
+  private Session session = HibernateUtil.getSessionFactory().openSession();
 
-  public TaskEditFormView(Task taskToEdit) {
-    this.taskToEdit = taskToEdit;
+  //Task details
+  private Project project;
+  private JRadioButton radioBtnSelected;
+  private Date selectedDate;
+  private String title;
+  private String description;
+  private MyAccCriteriaListModel accListModel;
+
+  public TaskEditFormView(TasksListView parenView) {
+    this.parenView = parenView;
+    taskToEdit = (Task) parenView.getAllTasksList().getSelectedValue();
     setUpTaskProjectComboBoxSource();
     setUpTaskStatusComboBoxSource();
     setUpCancelButtonListeners();
+    setUpUpdateTaskButtonListeners();
+    setUpAddAccButtonListeners();
     setUpEditForm();
+    session.beginTransaction();
     initView();
   }
 
@@ -115,15 +133,23 @@ public class TaskEditFormView extends JFrame {
     jDateModel.setSelected(true);
 
     //Acc criteria list
-    accListModel = new MyAccCriteriaListModel(taskToEdit.getAcceptCriteriaById());
-    accCriteriaJList.setModel(accListModel);
-    accCriteriaJList.repaint();
+    setUpAccCriteriaSource();
 
   }
 
+  //Add acc button - listeners
+  private void setUpAddAccButtonListeners() {
+    addAccBtn.addActionListener(e -> {
+      new NewAccCriteriaFormView(this, session);
+    });
+  }
+
   //Cancel button - listener - close window
-  public void setUpCancelButtonListeners(){
-    cancelTaskBtn.addActionListener(e -> dispose());
+  public void setUpCancelButtonListeners() {
+    cancelTaskBtn.addActionListener(e -> {
+      session.close();
+      dispose();
+    });
   }
 
   private void createUIComponents() {
@@ -136,5 +162,98 @@ public class TaskEditFormView extends JFrame {
 
     jDatePanelImpl = new JDatePanelImpl(jDateModel);
     dueToDatePicker = new JDatePickerImpl(jDatePanelImpl);
+  }
+
+
+  //Update button - listener - save updated task
+  private void setUpUpdateTaskButtonListeners() {
+    updateTaskBtn.addActionListener(e -> {
+      if (validateNewTaskDetails() && validateNewAccDetails()) {
+        //New acc add process is in new acc form
+        //Set Project
+        taskToEdit.setProject(project);
+        //Title
+        taskToEdit.setTitle(title);
+        //Description
+        taskToEdit.setDescription(description);
+        //Status
+        taskToEdit.setStatus((IssueStatusType) statusComboBox.getSelectedItem());
+        //DueToDate
+        taskToEdit.setDueToDate(new java.sql.Date(selectedDate.getTime()));
+
+        session.getTransaction().commit();
+        session.close();
+        parenView.setUpTasksListData();
+      }
+    });
+  }
+
+  //Validate data for selected Task
+  //Project,Title,Description,Priority,DueToDate
+  public boolean validateNewTaskDetails() {
+    try {
+      //Project
+      project = (Project) comboBox1.getSelectedItem();
+      if (project == null) {
+        throw new Exception("Validation Error. Project = null");
+      }
+
+      //Priority
+      radioBtnSelected = Stream
+          .of(priority0RadioBtn, priority1RadioBtn, priority2RadioBtn, priority3RadioBtn)
+          .filter(AbstractButton::isSelected).findFirst().orElse(null);
+
+      if (radioBtnSelected == null) {
+        throw new Exception("Validation Error. Priority = null");
+      }
+
+      //DueToDate
+      selectedDate = (Date) (dueToDatePicker.getModel().getValue());
+      if (selectedDate == null || !selectedDate.after(new Date())) {
+        throw new Exception("Validation Error. Due to date = null or before today");
+      }
+
+      //Title
+      title = titleTextField.getText();
+      if (title.isEmpty()) {
+        throw new Exception("Validation Error. Title = null");
+      }
+
+      //Description
+      description = descriptionTextField.getText();
+      if (description.isEmpty()) {
+        throw new Exception("Validation Error. description = null");
+      }
+
+      return true;
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(
+          null,
+          "Validation error! Please correct task input details.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE);
+      System.err.println("Create new task error validation!");
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  //Validate data for edited Acc
+  private boolean validateNewAccDetails() {
+    if (accCriteriaJList.getModel().getSize() > 0) {
+      return true;
+    } else {
+      JOptionPane.showMessageDialog(
+          null,
+          "Validation error! Acc list cannot be empty.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE);
+      System.err.println("Validation error. Cannot save Task. Acc list is empty.");
+      return false;
+    }
+  }
+
+  public Task getTaskToEdit() {
+    return taskToEdit;
   }
 }

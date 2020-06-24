@@ -127,8 +127,12 @@ public class TasksListView extends JFrame {
   private void setUpEditTaskButtonListeners() {
     editButton.addActionListener(e -> {
       if(!allTasksList.isSelectionEmpty()){
-        new TaskEditFormView((Task) allTasksList.getSelectedValue());
+        new TaskEditFormView(this);
       }
     });
+  }
+
+  public JList getAllTasksList() {
+    return allTasksList;
   }
 }
