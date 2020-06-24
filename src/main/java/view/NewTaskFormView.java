@@ -133,7 +133,6 @@ public class NewTaskFormView extends JFrame {
           "Validation error! Please correct task input details.",
           "Error",
           JOptionPane.ERROR_MESSAGE);
-      System.err.println("Create new task error validation!");
       e.printStackTrace();
       return false;
     }
