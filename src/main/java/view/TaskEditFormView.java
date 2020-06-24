@@ -54,7 +54,8 @@ public class TaskEditFormView extends JFrame {
   private TasksListView parenView;
   private Task taskToEdit;
   private UtilDateModel jDateModel;
-  private Session session = HibernateUtil.getSessionFactory().openSession(); // Edit process around one transaction
+  private Session session = HibernateUtil.getSessionFactory()
+      .openSession(); // Edit process around one transaction
 
   //Task details
   private Project project;
@@ -195,11 +196,13 @@ public class TaskEditFormView extends JFrame {
   //Validate data for selected Task
   //Project,Title,Description,Priority,DueToDate
   public boolean validateNewTaskDetails() {
+    String errorInfo = null;
     try {
       //Project
       project = (Project) comboBox1.getSelectedItem();
       if (project == null) {
-        throw new Exception("Validation Error. Project = null");
+        errorInfo = "Validation Error. Project = null";
+        throw new Exception(errorInfo);
       }
 
       //Priority
@@ -208,32 +211,39 @@ public class TaskEditFormView extends JFrame {
           .filter(AbstractButton::isSelected).findFirst().orElse(null);
 
       if (radioBtnSelected == null) {
-        throw new Exception("Validation Error. Priority = null");
+        errorInfo = "Validation Error. Priority = null";
+        throw new Exception(errorInfo);
       }
 
       //DueToDate
       selectedDate = (Date) (dueToDatePicker.getModel().getValue());
-      if (selectedDate == null || !selectedDate.after(new Date())) {
-        throw new Exception("Validation Error. Due to date = null or before today");
+      if (selectedDate == null) {
+        errorInfo = "Validation Error. Due to date = null";
+        throw new Exception(errorInfo);
+      } else if (!selectedDate.after(new Date())) {
+        errorInfo = "Validation Error. Due to date before today";
+        throw new Exception(errorInfo);
       }
 
       //Title
       title = titleTextField.getText();
       if (title.isEmpty()) {
-        throw new Exception("Validation Error. Title = null");
+        errorInfo = "Validation Error. Title = null";
+        throw new Exception(errorInfo);
       }
 
       //Description
       description = descriptionTextField.getText();
       if (description.isEmpty()) {
-        throw new Exception("Validation Error. description = null");
+        errorInfo = "Validation Error. Description = null";
+        throw new Exception(errorInfo);
       }
 
       return true;
     } catch (Exception e) {
       JOptionPane.showMessageDialog(
           null,
-          "Validation error! Please correct task input details.",
+          errorInfo,
           "Error",
           JOptionPane.ERROR_MESSAGE);
       System.err.println("Create new task error validation!");
@@ -262,7 +272,7 @@ public class TaskEditFormView extends JFrame {
     this.addWindowListener(new java.awt.event.WindowAdapter() {
       @Override
       public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-       session.close();
+        session.close();
       }
     });
   }
