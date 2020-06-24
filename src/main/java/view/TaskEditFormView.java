@@ -51,11 +51,10 @@ public class TaskEditFormView extends JFrame {
   private JRadioButton priority3RadioBtn;
   private JDatePicker dueToDatePicker;
 
-
   private TasksListView parenView;
   private Task taskToEdit;
   private UtilDateModel jDateModel;
-  private Session session = HibernateUtil.getSessionFactory().openSession();
+  private Session session = HibernateUtil.getSessionFactory().openSession(); // Edit process around one transaction
 
   //Task details
   private Project project;
@@ -68,13 +67,15 @@ public class TaskEditFormView extends JFrame {
   public TaskEditFormView(TasksListView parenView) {
     this.parenView = parenView;
     taskToEdit = (Task) parenView.getAllTasksList().getSelectedValue();
+    session.beginTransaction();
     setUpTaskProjectComboBoxSource();
     setUpTaskStatusComboBoxSource();
     setUpCancelButtonListeners();
+    windowCloseListeners();
     setUpUpdateTaskButtonListeners();
     setUpAddAccButtonListeners();
     setUpEditForm();
-    session.beginTransaction();
+
     initView();
   }
 
@@ -125,6 +126,9 @@ public class TaskEditFormView extends JFrame {
     if (radioBtnSelected != null) {
       radioBtnSelected.setSelected(true);
     }
+
+    //Status
+    statusComboBox.setSelectedItem(taskToEdit.getStatus());
 
     //Due to date
     //TODO fix - debug
@@ -251,6 +255,16 @@ public class TaskEditFormView extends JFrame {
       System.err.println("Validation error. Cannot save Task. Acc list is empty.");
       return false;
     }
+  }
+
+  //Close window by X in corner - listeners
+  private void windowCloseListeners() {
+    this.addWindowListener(new java.awt.event.WindowAdapter() {
+      @Override
+      public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+       session.close();
+      }
+    });
   }
 
   public Task getTaskToEdit() {
