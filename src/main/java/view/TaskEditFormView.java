@@ -76,6 +76,7 @@ public class TaskEditFormView extends JFrame {
     setUpCancelButtonListeners();
     setUpAccCriteriaDeleteButtonListeners();
     windowCloseListeners();
+    setUpAccEditButtonListeners();
     setUpUpdateTaskButtonListeners();
     setUpAddAccButtonListeners();
     setUpEditForm();
@@ -172,11 +173,11 @@ public class TaskEditFormView extends JFrame {
   }
 
   //Delete acc criteria button - listeners
-  private void setUpAccCriteriaDeleteButtonListeners(){
+  private void setUpAccCriteriaDeleteButtonListeners() {
     deleteAccBtn.addActionListener(e -> {
-      AcceptCriteria accSelected = null;
-      if(!accCriteriaJList.isSelectionEmpty()){
-       accSelected = (AcceptCriteria) accCriteriaJList.getSelectedValue();
+      AcceptCriteria accSelected;
+      if (!accCriteriaJList.isSelectionEmpty()) {
+        accSelected = (AcceptCriteria) accCriteriaJList.getSelectedValue();
         session.remove(accSelected);
         accListModel.source.remove(accSelected); //workaround - acc remove not committed yet
         accCriteriaJList.repaint();
@@ -296,7 +297,20 @@ public class TaskEditFormView extends JFrame {
     });
   }
 
+  //Edit acc button - listener
+  private void setUpAccEditButtonListeners() {
+    editAccBtn.addActionListener(e -> {
+      if (!accCriteriaJList.isSelectionEmpty()) {
+        new AccCriteriaEditFormView(this);
+      }
+    });
+  }
+
   public Task getTaskToEdit() {
     return taskToEdit;
+  }
+
+  public JList getAccCriteriaJList() {
+    return accCriteriaJList;
   }
 }
