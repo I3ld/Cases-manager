@@ -46,6 +46,7 @@ public class NewAccCriteriaFormView extends JFrame {
     setLocationRelativeTo(null);
   }
 
+  /**Listeners*/
   public void setUpAddButtonListeners() {
     addButton.addActionListener(e -> {
       if (!descriptionTextField.getText().isEmpty() && descriptionTextField.getText() != null) {
@@ -73,4 +74,5 @@ public class NewAccCriteriaFormView extends JFrame {
   public void setUpCancelButtonListeners() {
     cancelButton.addActionListener(e -> dispose());
   }
+  /**Listeners End*/
 }

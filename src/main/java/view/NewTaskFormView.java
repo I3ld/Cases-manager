@@ -80,6 +80,7 @@ public class NewTaskFormView extends JFrame {
     setLocationRelativeTo(null);
   }
 
+  /**Sources*/
   //Needed for gui form - non palette component - added mvn dependency
   private void createUIComponents() {
     LocalDate dateNow = LocalDate.now();
@@ -92,6 +93,66 @@ public class NewTaskFormView extends JFrame {
     jDatePanelImpl = new JDatePanelImpl(model);
     dueToDatePicker = new JDatePickerImpl(jDatePanelImpl);
   }
+
+  public void setUpAccCriteriaSource() {
+    accListModel = new MyAccCriteriaListModel(acceptCriterias);
+    accCriteriaJList.setModel(accListModel);
+    accCriteriaJList.repaint();
+  }
+  /**Sources End*/
+
+  /**Listeners*/
+  //Save button - listener(with process )
+  public void setUpSaveTaskButtonListeners() {
+    saveTaskBtn.addActionListener(e -> {
+      if (validateNewAccDetails() && validateNewTaskDetails()) {
+        //Crete new task and set project
+        Task newTask = new Task(descriptionTask, titleTask, priority,
+            new java.sql.Date(selectedDate.getTime()));
+        newTask.setProject(project);
+
+        TaskController taskController = new TaskController();
+
+        for (AcceptCriteria acc : acceptCriterias) {
+          acc.setProject(project);
+          newTask.addAcceptCriteria(acc);
+        }
+
+        taskController.addTask(newTask); //save new task to DB
+        dispose();
+        parentFrame.setUpTasksListData(); //refresh parent - tasks list
+      } else {
+        JOptionPane.showMessageDialog(
+            null,
+            "Validation error! Please correct task input details.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    });
+  }
+
+  //Button add new acc criteria - set listener to open new form
+  private void setUpAddAccCriteriaListeners() {
+    addAccBtn.addActionListener(e -> new NewAccCriteriaFormView(this));
+  }
+
+  //DeleteAcc button - listeners
+  private void setUpAccDeleteButtonListeners() {
+    deleteAccBtn.addActionListener(e -> {
+      if (!accCriteriaJList.isSelectionEmpty()) {
+        List<AcceptCriteria> selectedAcc = (List<AcceptCriteria>) accCriteriaJList
+            .getSelectedValuesList();
+        acceptCriterias.removeAll(selectedAcc);
+        setUpAccCriteriaSource();
+      }
+    });
+  }
+
+  //Cancel button action - Close window
+  private void setUpCancelButtonListeners() {
+    cancelTaskBtn.addActionListener(e -> dispose());
+  }
+  /**Listeners End*/
 
   private void setUpComboBoxProjectSource() {
     MyProjectComboBoxModel projectComboBoxModel = new MyProjectComboBoxModel();
@@ -152,63 +213,6 @@ public class NewTaskFormView extends JFrame {
       System.err.println("Validation error. Cannot save Task. Acc list is empty.");
       return false;
     }
-  }
-
-  public void setUpAccCriteriaSource() {
-    accListModel = new MyAccCriteriaListModel(acceptCriterias);
-    accCriteriaJList.setModel(accListModel);
-    accCriteriaJList.repaint();
-  }
-
-  //Save button - listener(with process )
-  public void setUpSaveTaskButtonListeners() {
-    saveTaskBtn.addActionListener(e -> {
-      if (validateNewAccDetails() && validateNewTaskDetails()) {
-        //Crete new task and set project
-        Task newTask = new Task(descriptionTask, titleTask, priority,
-            new java.sql.Date(selectedDate.getTime()));
-        newTask.setProject(project);
-
-        TaskController taskController = new TaskController();
-
-        for (AcceptCriteria acc : acceptCriterias) {
-          acc.setProject(project);
-          newTask.addAcceptCriteria(acc);
-        }
-
-        taskController.addTask(newTask); //save new task to DB
-        dispose();
-        parentFrame.setUpTasksListData(); //refresh parent - tasks list
-      } else {
-        JOptionPane.showMessageDialog(
-            null,
-            "Validation error! Please correct task input details.",
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
-      }
-    });
-  }
-
-  //Button add new acc criteria - set listener to open new form
-  private void setUpAddAccCriteriaListeners() {
-    addAccBtn.addActionListener(e -> new NewAccCriteriaFormView(this));
-  }
-
-  //DeleteAcc button - listeners
-  private void setUpAccDeleteButtonListeners() {
-    deleteAccBtn.addActionListener(e -> {
-      if (!accCriteriaJList.isSelectionEmpty()) {
-        List<AcceptCriteria> selectedAcc = (List<AcceptCriteria>) accCriteriaJList
-            .getSelectedValuesList();
-        acceptCriterias.removeAll(selectedAcc);
-        setUpAccCriteriaSource();
-      }
-    });
-  }
-
-  //Cancel button action - Close window
-  private void setUpCancelButtonListeners() {
-    cancelTaskBtn.addActionListener(e -> dispose());
   }
 
   public List<AcceptCriteria> getAcceptCriterias() {

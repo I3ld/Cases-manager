@@ -41,6 +41,7 @@ public class AccCriteriaEditFormView extends JFrame {
     setLocationRelativeTo(null);
   }
 
+  /**Sources*/
   //fil form data from selected acc
   public void setUpEditForm() {
     descriptionTextField.setText(selectedAcc.getDescription());
@@ -51,7 +52,9 @@ public class AccCriteriaEditFormView extends JFrame {
   private void setUpAccStatusComboBoxSource() {
     comboBox1.setModel(new DefaultComboBoxModel<>(IssueStatusType.values()));
   }
+  /**Sources End*/
 
+  /**Listeners*/
   //Edit button - accept changes - listeners
   private void setUpEditAccCriteriaEditButtonListeners() {
     editButton.addActionListener(e -> {
@@ -68,4 +71,5 @@ public class AccCriteriaEditFormView extends JFrame {
   private void setUpCancelAccCriteriaEditButtonListeners() {
     cancelButton.addActionListener(e -> dispose());
   }
+  /**Listeners End*/
 }

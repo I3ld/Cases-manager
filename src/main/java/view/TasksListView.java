@@ -48,6 +48,7 @@ public class TasksListView extends JFrame {
     setLocationRelativeTo(null);
   }
 
+  /**Sources*/
   //JList tasks - set source
   public void setUpTasksListData() {
     //Tasks
@@ -64,7 +65,9 @@ public class TasksListView extends JFrame {
     listAccCriteriaModel = new MyAccCriteriaListModel(accCriteriaList);
     allAccCriteriaList.setModel(listAccCriteriaModel);
   }
+  /**Sources End*/
 
+  /**Listeners*/
   //Jlist tasks - value changed selected
   public void setUpTasksListListener() {
     allTasksList.addListSelectionListener(e -> {
@@ -98,6 +101,16 @@ public class TasksListView extends JFrame {
     });
   }
 
+  //Edit task button - set listeners
+  private void setUpEditTaskButtonListeners() {
+    editButton.addActionListener(e -> {
+      if(!allTasksList.isSelectionEmpty()){
+        new TaskEditFormView(this);
+      }
+    });
+  }
+  /**Listeners End*/
+
   //Delete button - delete process with confirm JPane
   public void deleteAction() {
     List currentTasksList = allTasksList.getSelectedValuesList();
@@ -120,15 +133,6 @@ public class TasksListView extends JFrame {
         System.err.println("Error: Task delete action.");
       }
     }
-  }
-
-  //Edit task button - set listeners
-  private void setUpEditTaskButtonListeners() {
-    editButton.addActionListener(e -> {
-      if(!allTasksList.isSelectionEmpty()){
-        new TaskEditFormView(this);
-      }
-    });
   }
 
   public JList getAllTasksList() {

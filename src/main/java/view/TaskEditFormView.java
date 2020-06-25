@@ -93,6 +93,7 @@ public class TaskEditFormView extends JFrame {
     setLocationRelativeTo(null);
   }
 
+  /**Sources*/
   //Set status combo box model - enum
   //! Must be call before setUpEditForm()
   private void setUpTaskProjectComboBoxSource() {
@@ -136,7 +137,6 @@ public class TaskEditFormView extends JFrame {
     statusComboBox.setSelectedItem(taskToEdit.getStatus());
 
     //Due to date
-    //TODO fix - debug
     Date date = taskToEdit.getDueToDate();
     jDateModel.setValue(date);
     jDateModel.setSelected(true);
@@ -145,6 +145,20 @@ public class TaskEditFormView extends JFrame {
     setUpAccCriteriaSource();
   }
 
+  private void createUIComponents() {
+    LocalDate dateNow = LocalDate.now();
+
+    //set up data picker model with init date now
+    jDateModel = new UtilDateModel();
+    jDateModel.setDate(dateNow.getYear(), dateNow.getMonthValue(), dateNow.getDayOfMonth());
+    jDateModel.setSelected(true);
+
+    jDatePanelImpl = new JDatePanelImpl(jDateModel);
+    dueToDatePicker = new JDatePickerImpl(jDatePanelImpl);
+  }
+  /**Sources End*/
+
+  /**Listeners*/
   //Add acc button - listeners
   private void setUpAddAccButtonListeners() {
     addAccBtn.addActionListener(e -> {
@@ -158,18 +172,6 @@ public class TaskEditFormView extends JFrame {
       session.close();
       dispose();
     });
-  }
-
-  private void createUIComponents() {
-    LocalDate dateNow = LocalDate.now();
-
-    //set up data picker model with init date now
-    jDateModel = new UtilDateModel();
-    jDateModel.setDate(dateNow.getYear(), dateNow.getMonthValue(), dateNow.getDayOfMonth());
-    jDateModel.setSelected(true);
-
-    jDatePanelImpl = new JDatePanelImpl(jDateModel);
-    dueToDatePicker = new JDatePickerImpl(jDatePanelImpl);
   }
 
   //Delete acc criteria button - listeners
@@ -211,6 +213,41 @@ public class TaskEditFormView extends JFrame {
         dispose();
       }
     });
+  }
+
+  //Close window by X in corner - listeners
+  private void windowCloseListeners() {
+    this.addWindowListener(new java.awt.event.WindowAdapter() {
+      @Override
+      public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+        session.close();
+      }
+    });
+  }
+
+  //Edit acc button - listener
+  private void setUpAccEditButtonListeners() {
+    editAccBtn.addActionListener(e -> {
+      if (!accCriteriaJList.isSelectionEmpty()) {
+        new AccCriteriaEditFormView(this);
+      }
+    });
+  }
+  /**Listeners End*/
+
+  //Validate data for edited Acc
+  private boolean validateNewAccDetails() {
+    if (accCriteriaJList.getModel().getSize() > 0) {
+      return true;
+    } else {
+      JOptionPane.showMessageDialog(
+          null,
+          "Validation error! Acc list cannot be empty.",
+          "Error",
+          JOptionPane.ERROR_MESSAGE);
+      System.err.println("Validation error. Cannot save Task. Acc list is empty.");
+      return false;
+    }
   }
 
   //Validate data for selected Task
@@ -270,40 +307,6 @@ public class TaskEditFormView extends JFrame {
       e.printStackTrace();
       return false;
     }
-  }
-
-  //Validate data for edited Acc
-  private boolean validateNewAccDetails() {
-    if (accCriteriaJList.getModel().getSize() > 0) {
-      return true;
-    } else {
-      JOptionPane.showMessageDialog(
-          null,
-          "Validation error! Acc list cannot be empty.",
-          "Error",
-          JOptionPane.ERROR_MESSAGE);
-      System.err.println("Validation error. Cannot save Task. Acc list is empty.");
-      return false;
-    }
-  }
-
-  //Close window by X in corner - listeners
-  private void windowCloseListeners() {
-    this.addWindowListener(new java.awt.event.WindowAdapter() {
-      @Override
-      public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-        session.close();
-      }
-    });
-  }
-
-  //Edit acc button - listener
-  private void setUpAccEditButtonListeners() {
-    editAccBtn.addActionListener(e -> {
-      if (!accCriteriaJList.isSelectionEmpty()) {
-        new AccCriteriaEditFormView(this);
-      }
-    });
   }
 
   public Task getTaskToEdit() {
