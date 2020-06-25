@@ -1,5 +1,10 @@
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import model.AcceptCriteria;
 import model.Employee;
+import model.Issue;
+import model.Project;
 import model.RegularEmployee;
 import org.hibernate.Session;
 import util.HibernateUtil;
@@ -9,12 +14,6 @@ import view.TasksListView;
 public class Main {
 
   public static void main(String[] args) {
-    /*Session session = HibernateUtil.getSessionFactory().openSession();
-    List<RegularEmployee> emps = session.createQuery("from RegularEmployee").list();*/
-
-    TasksListView mainTasksFrame = new TasksListView();
-    //NewTaskFormView mainTasksFram = new NewTaskFormView();
-
-
+    new TasksListView();
   }
 }
