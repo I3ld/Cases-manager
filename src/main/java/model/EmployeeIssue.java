@@ -89,6 +89,7 @@ public class EmployeeIssue {
       this.employee = employee;
       employee.addEmployeeIssue(this); //reverse connection
     } else if (employee != null && !this.employee.equals(employee)) {
+      this.employee.getEmployeeIssues().remove(this); //reverse connection
       this.employee = employee;
       employee.addEmployeeIssue(this); //reverse connection
     }
@@ -104,6 +105,7 @@ public class EmployeeIssue {
       this.issue = issue;
       issue.addEmployeeIssue(this); //reverse connection
     } else if (issue != null && !this.issue.equals(issue)) {
+      this.issue.getEmployeeIssues().remove(this); //reverse connection
       this.issue = issue;
       issue.addEmployeeIssue(this); //reverse connection
     }

@@ -46,6 +46,7 @@ public class AcceptCriteria extends Issue {
       this.taskByTaskId = taskByTaskId;
       taskByTaskId.addAcceptCriteria(this); //reverse connection
     } else if (taskByTaskId != null && !this.taskByTaskId.equals(taskByTaskId)) {
+      this.taskByTaskId.getAcceptCriteriaById().remove(this); //reverse connection
       this.taskByTaskId = taskByTaskId;
       taskByTaskId.addAcceptCriteria(this); //reverse connection
     }

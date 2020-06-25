@@ -141,6 +141,7 @@ public abstract class Employee {
       this.project = project;
       project.addEmployee(this); //reverse connection
     } else if (project != null && !this.project.equals(project)) {
+      this.project.getEmployees().remove(this); //reverse connection
       this.project = project;
       project.addEmployee(this); //reverse connection
     }
