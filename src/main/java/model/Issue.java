@@ -119,7 +119,14 @@ public abstract class Issue {
   }
 
   public void setProject(Project project) {
-    this.project = project;
+    if (this.project == null && project != null) {
+      this.project = project;
+      project.addIssueQualified(this); //reverse connection
+    } else if (project != null && !this.project.equals(project)) {
+      this.project.getIssuesQualified().remove(this.getId()); //reverse connection
+      this.project = project;
+      project.addIssueQualified(this); //reverse connection
+    }
   }
 
   public enum IssueStatusType {New, Active, Canceled, Done}

@@ -101,7 +101,14 @@ public class Task extends Issue {
   }
 
   public void setEventByEventId(Event eventByEventId) {
-    this.eventByEventId = eventByEventId;
+    if (this.eventByEventId == null && eventByEventId != null) {
+      this.eventByEventId = eventByEventId;
+      eventByEventId.getTasksById().add(this); //reverse connection
+    } else if (this.eventByEventId != null && !this.eventByEventId.equals(eventByEventId)) {
+      this.eventByEventId.getTasksById().remove(this); //reverse connection
+      this.eventByEventId = eventByEventId;
+      eventByEventId.getTasksById().add(this); //reverse connection
+    }
   }
 
   @Override

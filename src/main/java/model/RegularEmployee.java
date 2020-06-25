@@ -104,7 +104,7 @@ public class RegularEmployee extends Employee {
       this.supervisor = supervisor;
       supervisor.addSubordinate(this); //reverse connection
     } else if (this.supervisor != null && !this.supervisor.equals(supervisor)) {
-      this.supervisor.getSubordinates().remove(this); //remove previous connection
+      this.supervisor.getSubordinates().remove(this); //reverse connection
       this.supervisor = supervisor;
       supervisor.addSubordinate(this); //reverse connection
     }

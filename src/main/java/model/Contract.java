@@ -102,6 +102,7 @@ public class Contract {
       this.company = company;
       company.addContract(this); //reverse connection
     } else if (company != null && !this.company.equals(company)) {
+      this.company.getContracts().remove(this); //reverse connection
       this.company = company;
       company.addContract(this); //reverse connection
     }
@@ -117,6 +118,7 @@ public class Contract {
       this.boss = boss;
       boss.addContract(this); //reverse connection
     } else if (boss != null && !this.boss.equals(boss)) {
+      this.boss.getContracts().remove(this); //reverse connection
       this.boss = boss;
       boss.addContract(this); //reverse connection
     }
