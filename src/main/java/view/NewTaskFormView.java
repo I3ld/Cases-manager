@@ -80,7 +80,9 @@ public class NewTaskFormView extends JFrame {
     setLocationRelativeTo(null);
   }
 
-  /**Sources*/
+  /**
+   * Sources
+   */
   //Needed for gui form - non palette component - added mvn dependency
   private void createUIComponents() {
     LocalDate dateNow = LocalDate.now();
@@ -101,7 +103,9 @@ public class NewTaskFormView extends JFrame {
   }
   /**Sources End*/
 
-  /**Listeners*/
+  /**
+   * Listeners
+   */
   //Save button - listener(with process )
   public void setUpSaveTaskButtonListeners() {
     saveTaskBtn.addActionListener(e -> {
@@ -109,12 +113,14 @@ public class NewTaskFormView extends JFrame {
         //Crete new task and set project
         Task newTask = new Task(descriptionTask, titleTask, priority,
             new java.sql.Date(selectedDate.getTime()));
-        newTask.setProject(project);
 
         TaskController taskController = new TaskController();
+        taskController.persist(newTask);
+        newTask.setProjectQualif(project);
 
         for (AcceptCriteria acc : acceptCriterias) {
-          acc.setProject(project);
+          taskController.persist(acc);
+          acc.setProjectQualif(project);
           newTask.addAcceptCriteria(acc);
         }
 
@@ -152,7 +158,10 @@ public class NewTaskFormView extends JFrame {
   private void setUpCancelButtonListeners() {
     cancelTaskBtn.addActionListener(e -> dispose());
   }
-  /**Listeners End*/
+
+  /**
+   * Listeners End
+   */
 
   private void setUpComboBoxProjectSource() {
     MyProjectComboBoxModel projectComboBoxModel = new MyProjectComboBoxModel();

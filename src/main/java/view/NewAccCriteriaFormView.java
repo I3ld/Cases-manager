@@ -51,8 +51,10 @@ public class NewAccCriteriaFormView extends JFrame {
     addButton.addActionListener(e -> {
       if (!descriptionTextField.getText().isEmpty() && descriptionTextField.getText() != null) {
         if (parentFrame != null) {
+          AcceptCriteria newAcc = new AcceptCriteria(descriptionTextField.getText());
+
           parentFrame.getAcceptCriterias()
-              .add(new AcceptCriteria(descriptionTextField.getText()));
+              .add(newAcc);
           parentFrame.setUpAccCriteriaSource();
           dispose();
         } else if (parentFrameEdit != null) {

@@ -100,6 +100,60 @@ public class BusinessLogicTest {
 
   /**
    * TEST - qualified association Issue[0..1] - Project[*]: Insert new project, Insert new
+   * Issue(Task+AccCriteria), update associations, Get project from db, verify data prom projectDb
+   */
+  @Test
+  public void qualifiedAssociation_2() {
+    //Insert new project
+    //new name every iteration because it's PK
+    Long nr =
+        (Long) session.createQuery("select count(*) from Project").uniqueResult() + 1;
+    String projectName = "Name project" + nr;
+
+    Project project = new Project(projectName, "Description project test",
+        java.sql.Date.valueOf(LocalDate.now()), new BigDecimal("12456789.50"),
+        java.sql.Date.valueOf(LocalDate.parse("2022-11-04")));
+
+    //Insert new task(assign project to task)
+    Task task = new Task("task title description test", "task title test", 2,
+        Date.valueOf(LocalDate.parse("2021-12-06")));
+    AcceptCriteria acc = new AcceptCriteria("Acc criteria test description");
+
+    session.beginTransaction();
+    session.persist(task); //must persist to assign id - need for key(id) in map issuesQualified
+    session.persist(acc); //must persist to assign id - need for key(id) in map issuesQualified
+    task.setProjectQualif(project);
+    acc.setProjectQualif(project);
+    task.addAcceptCriteria(acc);
+    session.save(project);
+    session.save(task);
+    session.save(acc);
+    session.getTransaction().commit();
+
+    Query query = session.createQuery("from Project where name = :projectName")
+        .setParameter("projectName", projectName);
+
+    Project projectDb = (Project) query.getSingleResult();
+
+    try {
+      Task taskDb = (Task) projectDb.getIssuesQualifiedById(task.getId());
+      AcceptCriteria accDb = (AcceptCriteria) projectDb.getIssuesQualifiedById(acc.getId());
+
+      assertEquals(task, taskDb);
+      assertEquals(acc, accDb);
+      assertEquals(acc, taskDb.getAcceptCriteriaById().get(0));
+      assertEquals(taskDb.getProject(), projectDb);
+      assertEquals(accDb.getProject(), projectDb);
+    } catch (Exception e) {
+      System.err.println(
+          "Cannot get issue from project!  issue id:" + task.getId() + " project: " + project
+              .getName());
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * TEST - qualified association Issue[0..1] - Project[*]: Insert new project, Insert new
    * Issue(Task+AccCriteria), update associations, Get project from db, get non-existent issue from
    * project
    */

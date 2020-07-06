@@ -2,6 +2,7 @@ package controller;
 
 import java.util.List;
 import javax.persistence.criteria.CriteriaQuery;
+import model.Issue;
 import model.Task;
 import org.hibernate.Session;
 import util.HibernateUtil;
@@ -55,6 +56,16 @@ public class TaskController {
   public boolean updateTaskWithoutCommit(Task task, Session session) {
     try {
       session.update(task);
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  public boolean persist(Issue issue) {
+    try {
+      session.persist(issue);
       return true;
     } catch (Exception e) {
       e.printStackTrace();

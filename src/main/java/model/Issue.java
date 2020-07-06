@@ -2,9 +2,7 @@ package model;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
@@ -16,9 +14,9 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import util.HibernateUtil;
 
 @Entity(name = "Issue")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -118,13 +116,17 @@ public abstract class Issue {
     return project;
   }
 
-  public void setProject(Project project) {
+ public void setProject(Project project) { //Required by Hibernate - for init
+    this.project = project;
+  }
+
+  public void setProjectQualif(Project project) {
     if (this.project == null && project != null) {
-      this.project = project;
+      setProject(project);
       project.addIssueQualified(this); //reverse connection
     } else if (project != null && !this.project.equals(project)) {
       this.project.getIssuesQualified().remove(this.getId()); //reverse connection
-      this.project = project;
+      setProject(project);
       project.addIssueQualified(this); //reverse connection
     }
   }

@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
@@ -150,7 +152,7 @@ public class Project {
 
   //qualified association Issue - Project
   //Required by hibernate
-  @OneToMany(mappedBy = "project")
+  @OneToMany(mappedBy = "project", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @MapKey(name = "id")
   public Map<Integer, Issue> getIssuesQualified() {
     return issuesQualified;
@@ -184,9 +186,9 @@ public class Project {
   public String toString() {
     return
         "Name: '" + name + '\'' +
-        ", Description: " + description + '\'' +
-        ", Create Date: " + createDate +
-        ", Budget: " + budget +
-        ", Expected end date: " + expectedEndDate;
+            ", Description: " + description + '\'' +
+            ", Create Date: " + createDate +
+            ", Budget: " + budget +
+            ", Expected end date: " + expectedEndDate;
   }
 }
