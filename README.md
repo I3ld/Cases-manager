@@ -1,5 +1,5 @@
 # Cases-manager
-Desktop app for mage cases
+Desktop app for manage cases
 
 ## Description
 
